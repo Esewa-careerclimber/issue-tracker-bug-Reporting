@@ -1,6 +1,6 @@
 # Issue Tracking and Bug Reporting System
 
-system allows users, testers, and developers to log, track, prioritize, and resolve issues/bugs efficiently.
+This system allows users, testers, and developers to log, track, prioritize, and resolve issues/bugs efficiently.
 
 ## Collaboration Rules
 - **Pull Requests (PRs)** must be reviewed by at least one team member.
