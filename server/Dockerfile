@@ -1,6 +1,9 @@
 # Use latest Node LTS
 FROM node:20-alpine
 
+# Install curl for healthcheck
+RUN apk --no-cache add curl
+
 # Set working directory
 WORKDIR /app
 

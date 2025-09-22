@@ -98,7 +98,19 @@ jobs:
       - name: Test Docker Compose startup
         run: |
           docker compose up -d
-          sleep 10
-          curl --fail http://localhost:5000/health || exit 1
+          echo "Waiting for services to be ready..."
+          
+          # Wait for MongoDB to be ready
+          timeout 30 bash -c 'until docker compose exec -T mongodb mongosh --eval "db.adminCommand({ping:1})" > /dev/null 2>&1; do echo "Waiting for MongoDB..." && sleep 2; done'
+          
+          # Wait for server to be ready
+          timeout 30 bash -c 'until curl -s http://localhost:5000/health > /dev/null; do echo "Waiting for server..." && sleep 2; done'
+          
+          # Final health check
+          curl --fail http://localhost:5000/health
+          
+          # Show running containers
           docker compose ps
+          
+          # Cleanup
           docker compose down

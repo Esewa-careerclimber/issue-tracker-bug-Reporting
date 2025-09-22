@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # MongoDB Database
   mongodb:
@@ -16,6 +14,11 @@ services:
       - mongodb_data:/data/db
     networks:
       - issue-tracker-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   # Backend Server
   server:
@@ -24,6 +27,11 @@ services:
     restart: unless-stopped
     ports:
       - "5000:5000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     environment:
       - NODE_ENV=development
       - PORT=5000
