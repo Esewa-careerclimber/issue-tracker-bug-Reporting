@@ -38,12 +38,13 @@ jobs:
         working-directory: ./server
         run: npm ci
 
-      - name: Check server can start
+      - name: Run server tests
         working-directory: ./server
-        run: timeout 10s npm start || echo "Server start check completed"
+        run: npm test
         env:
           NODE_ENV: test
           MONGO_URI: mongodb://localhost:27017/issue_tracker_test
+          PORT: 5000
 
   # -------------------
   # 2. Client (React) Tests
@@ -65,13 +66,13 @@ jobs:
         working-directory: ./client
         run: npm ci
 
-      - name: Check client can build
+      - name: Run client tests and build
         working-directory: ./client
-        run: npm run build
-
-      - name: Run client linting
-        working-directory: ./client
-        run: npm run lint || echo "Linting issues found"
+        run: |
+          npm test
+          npm run build
+        env:
+          CI: true
 
 
   # -------------------
@@ -94,5 +95,6 @@ jobs:
         run: |
           docker compose up -d
           sleep 10
+          curl --fail http://localhost:5000/health || exit 1
           docker compose ps
           docker compose down
