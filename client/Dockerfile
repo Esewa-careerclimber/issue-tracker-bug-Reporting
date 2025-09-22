@@ -4,14 +4,11 @@ FROM node:20-alpine
 # Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
-COPY package*.json ./
-
-# Install dependencies
-RUN npm ci
-
-# Copy all source files
+# Copy all source files first (needed for install)
 COPY . .
+
+# Install dependencies with clean slate
+RUN rm -rf node_modules package-lock.json && npm install
 
 # Expose React dev server port
 EXPOSE 3000
