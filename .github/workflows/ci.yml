@@ -36,7 +36,9 @@ jobs:
 
       - name: Install server dependencies
         working-directory: ./server
-        run: npm ci
+        run: |
+          rm -f package-lock.json
+          npm install
 
       - name: Run server tests
         working-directory: ./server

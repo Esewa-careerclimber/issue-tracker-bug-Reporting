@@ -22,7 +22,8 @@ describe('Server API Tests', () => {
       
       expect(response.body).toEqual({
         status: 'ok',
-        message: 'Service is running'
+        message: 'Server is running',
+        db: 'disconnected'  // In test environment, we expect disconnected since we mock the DB
       });
     });
   });
