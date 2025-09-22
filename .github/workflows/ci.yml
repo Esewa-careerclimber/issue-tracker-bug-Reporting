@@ -42,7 +42,9 @@ jobs:
 
       - name: Run server tests
         working-directory: ./server
-        run: npm test
+        run: |
+          echo "Running tests with NODE_ENV=test"
+          NODE_ENV=test npm test
         env:
           NODE_ENV: test
           MONGO_URI: mongodb://localhost:27017/issue_tracker_test
