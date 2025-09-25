@@ -18,7 +18,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: 20
+  NODE_VERSION: 18
 
 jobs:
   server-test:
@@ -26,7 +26,7 @@ jobs:
     timeout-minutes: 10
     services:
       mongo:
-        image: mongo:7
+        image: mongo:6
         ports:
           - 27017:27017
         options: >-
@@ -58,7 +58,7 @@ jobs:
 
       - name: Upload coverage (optional)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: server-coverage
           path: server/coverage
