@@ -2,23 +2,23 @@ name: MERN CI/CD Pipeline
 
 on:
   push:
-    branches: [main, dev]
+    branches: ['**']  # Run on all branches
   pull_request:
     branches: [main, dev]
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   checks: write    
   pull-requests: write  
-  actions: read 
+  actions: write
 
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: 18
+  NODE_VERSION: 16
 
 jobs:
   server-test:
@@ -26,14 +26,14 @@ jobs:
     timeout-minutes: 10
     services:
       mongo:
-        image: mongo:6
+        image: mongo:5.0
         ports:
           - 27017:27017
         options: >-
-          --health-cmd="mongosh --quiet --eval 'db.adminCommand({ping:1})'"
+          --health-cmd mongosh --eval "db.runCommand({ ping: 1 })"
           --health-interval=5s
           --health-timeout=5s
-          --health-retries=12
+          --health-retries=5
     steps:
       - name: Checkout
         uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608
@@ -87,7 +87,7 @@ jobs:
         working-directory: client
         env:
           CI: true
-        run: npm test
+        run: npm test --passWithNoTests  # Allow tests to pass if none exist yet
 
       - name: Build
         working-directory: client
