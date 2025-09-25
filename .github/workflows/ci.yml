@@ -2,13 +2,9 @@ name: MERN CI/CD Pipeline
 
 on:
   push:
-    branches: [main, develop]
-    paths-ignore:
-      - "*.md"
+    branches: [main, dev]
   pull_request:
-    branches: [main, develop]
-    paths-ignore:
-      - "*.md"
+    branches: [main, dev]
 
 jobs:
   # -------------------
