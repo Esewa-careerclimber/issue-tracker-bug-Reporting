@@ -1,0 +1,151 @@
+name: MERN CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  checks: write    
+  pull-requests: write  
+  actions: read 
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: 20
+
+jobs:
+  server-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd="mongosh --quiet --eval 'db.adminCommand({ping:1})'"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+
+      - name: Install deps
+        working-directory: server
+        run: npm ci
+
+      - name: Run tests
+        working-directory: server
+        env:
+            NODE_ENV: test
+            MONGO_URI: mongodb://localhost:27017/issue_tracker_test
+        run: npm test -- --ci
+
+      - name: Upload coverage (optional)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-coverage
+          path: server/coverage
+          if-no-files-found: ignore
+          retention-days: 3
+
+  client-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+
+      - name: Install deps
+        working-directory: client
+        run: npm ci
+
+      - name: Run tests
+        working-directory: client
+        env:
+          CI: true
+        run: npm test
+
+      - name: Build
+        working-directory: client
+        run: npm run build
+
+      - name: Upload build (optional)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-dist
+          path: client/dist
+          if-no-files-found: ignore
+          retention-days: 3
+
+  docker-compose-test:
+    runs-on: ubuntu-latest
+    needs: [server-test, client-test]
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build images
+        run: docker compose build
+
+      - name: Start stack
+        run: docker compose up -d
+
+      - name: Wait for Mongo
+        run: |
+          for i in {1..30}; do
+            if docker compose exec -T mongodb mongosh --quiet --eval 'db.adminCommand({ping:1})' >/dev/null 2>&1; then
+              echo "Mongo ready"; break
+            fi
+            sleep 2
+          done
+
+      - name: Wait for server
+        run: |
+          for i in {1..30}; do
+            if curl -fs http://localhost:5000/health >/dev/null 2>&1; then
+              echo "Server healthy"; break
+            fi
+            sleep 2
+          done
+          curl -f http://localhost:5000/health
+
+      - name: Show containers
+        run: docker compose ps
+
+      - name: Logs on failure
+        if: failure()
+        run: |
+          echo "--- Server logs ---"
+          docker compose logs server || true
+          echo "--- Mongo logs ---"
+          docker compose logs mongodb || true
+
+      - name: Shutdown
+        if: always()
+        run: docker compose down -v
