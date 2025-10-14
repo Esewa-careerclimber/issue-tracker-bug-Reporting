@@ -8,9 +8,9 @@ describe('App', () => {
     expect(screen.getByRole('main')).toBeInTheDocument()
   })
 
-  it('displays the main heading', () => {
+  it('displays the dashboard heading', () => {
     render(<App />)
-    const heading = screen.getByRole('heading', { name: /vite \+ react/i })
+    const heading = screen.getByText(/Dashboard/i)
     expect(heading).toBeInTheDocument()
   })
 })
