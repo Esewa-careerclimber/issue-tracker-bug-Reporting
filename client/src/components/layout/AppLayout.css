@@ -1,0 +1,24 @@
+.appLayout{display:grid;grid-template-columns:240px 1fr 300px;min-height:100dvh;overflow:hidden;background:var(--color-bg);color:var(--color-text);}
+.appSidebar{border-right:1px solid var(--color-border);background:var(--color-surface);display:flex;flex-direction:column;padding:12px 14px;gap:20px;}
+.sideNav .brandRow{font-size:18px;font-weight:600;letter-spacing:.5px;}
+.navGroup{display:flex;flex-direction:column;gap:2px;}
+.navLabel{font-size:11px;text-transform:uppercase;margin-top:14px;opacity:.6;letter-spacing:.5px;}
+.navItem{padding:8px 10px;border-radius:6px;font-size:14px;text-decoration:none;color:inherit;display:block;transition:background .15s;}
+.navItem:hover{background:var(--color-hover);}
+.navItem.active{background:var(--color-accent);color:#fff;}
+.mainRegion{display:flex;flex-direction:column;min-width:0;}
+.topBarWrap{border-bottom:1px solid var(--color-border);background:linear-gradient(to right,var(--color-surface),var(--color-surface-alt));}
+.topBar{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;gap:16px;}
+.tbTitle{font-size:20px;margin:0;font-weight:600;}
+.modeToggle{background:var(--color-surface-alt);border:1px solid var(--color-border);padding:6px 12px;border-radius:6px;font-size:13px;cursor:pointer;color:inherit;}
+.modeToggle:hover{background:var(--color-hover);}
+.contentWrap{padding:20px;min-height:0;overflow:auto;}
+.rightPanel{border-left:1px solid var(--color-border);background:var(--color-surface);display:flex;flex-direction:column;}
+.inboxPanel{display:flex;flex-direction:column;height:100%;}
+.panelHead{padding:12px 16px;font-weight:600;border-bottom:1px solid var(--color-border);}
+.inboxList{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:8px;}
+.inboxItem{background:var(--color-surface-alt);border:1px solid var(--color-border);padding:10px 12px;border-radius:6px;font-size:13px;}
+
+/* Responsive */
+@media (max-width:1200px){.appLayout{grid-template-columns:220px 1fr;} .rightPanel{display:none;}}
+@media (max-width:850px){.appLayout{grid-template-columns:1fr;} .appSidebar{position:fixed;inset:0 60% 0 0;z-index:30;box-shadow:2px 0 8px rgba(0,0,0,.4);} }

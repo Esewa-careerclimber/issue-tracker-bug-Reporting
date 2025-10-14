@@ -1,0 +1,9 @@
+.kanbanWrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;align-items:start;}
+.kanbanCol{background:var(--color-surface);border:1px solid var(--color-border);border-radius:12px;display:flex;flex-direction:column;max-height:480px;}
+.colHead{padding:10px 14px;font-size:13px;font-weight:600;letter-spacing:.5px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--color-border);background:var(--color-surface-alt);border-top-left-radius:12px;border-top-right-radius:12px;}
+.count{background:var(--color-accent);color:#fff;font-size:11px;padding:2px 6px;border-radius:16px;}
+.colBody{padding:10px 10px 14px;display:flex;flex-direction:column;gap:10px;overflow:auto;}
+.ticket{background:var(--color-surface-alt);border:1px solid var(--color-border);padding:10px 12px;border-radius:8px;font-size:13px;line-height:1.3;cursor:pointer;box-shadow:0 1px 1px rgba(0,0,0,.15);}
+.ticket:hover{background:var(--color-hover);}
+
+@media (max-width:950px){.kanbanWrap{display:flex;overflow-x:auto;gap:16px;padding-bottom:4px;} .kanbanCol{min-width:220px;flex:0 0 220px;}}
