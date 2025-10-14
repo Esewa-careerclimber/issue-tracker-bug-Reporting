@@ -10,7 +10,8 @@ describe('App', () => {
 
   it('displays the dashboard heading', () => {
     render(<App />)
-    const heading = screen.getByText(/Dashboard/i)
+    // Use a more specific selector that targets the page title
+    const heading = screen.getByText(/Dashboard/i, { selector: '.pageTitle' })
     expect(heading).toBeInTheDocument()
   })
 })
