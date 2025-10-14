@@ -38,7 +38,7 @@ export function Dashboard() {
           <div className="navSection">
             <div className="navLabel">OVERVIEW</div>
             <a href="#" className="navItem active">Dashboard</a>
-            <a href="#" className="navItem">My Issues</a>
+            <a href="#" className="navItem">My Issues one</a>
             <a href="#" className="navItem">Report Issue</a>
           </div>
           
