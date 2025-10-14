@@ -1,0 +1,255 @@
+.dashboard {
+  display: grid;
+  grid-template-areas:
+    "sidebar header header"
+    "sidebar content inbox";
+  grid-template-columns: 220px 1fr 220px;
+  grid-template-rows: auto 1fr;
+  height: 100vh;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+.header {
+  grid-area: header;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 30px;
+  background-color: var(--color-bg);
+}
+
+.pageTitle {
+  font-weight: 600;
+  font-size: 22px;
+  padding-bottom: 5px;
+  margin-bottom: 20px;
+}
+
+.darkModeBtn {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  padding: 8px 16px;
+  border-radius: 4px;
+  color: var(--color-text);
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.darkModeBtn:hover {
+  background: var(--color-surface);
+}
+
+.inbox {
+  text-align: center;
+  font-weight: 600;
+}
+
+.sidebar {
+  grid-area: sidebar;
+  border-right: 1px solid var(--color-border);
+  background-color: var(--color-bg-alt);
+  padding: 20px 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.logo {
+  font-weight: 600;
+  font-size: 18px;
+  padding: 10px 16px;
+  margin-bottom: 20px;
+}
+
+.navSection {
+  margin-bottom: 24px;
+}
+
+.navLabel {
+  font-size: 12px;
+  color: var(--color-text-dim);
+  margin-bottom: 8px;
+  padding: 0 16px;
+}
+
+.navItem {
+  display: block;
+  padding: 10px 16px;
+  margin-bottom: 4px;
+  color: var(--color-text);
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.navItem:hover {
+  background-color: rgba(0,0,0,0.05);
+}
+
+.navItem.active {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.content {
+  grid-area: content;
+  padding: 0 30px 30px;
+  overflow: auto;
+}
+
+.statCards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.statCard {
+  background-color: var(--color-bg-alt);
+  border-radius: 10px;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+}
+
+.statValue {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.statLabel {
+  color: var(--color-text-dim);
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+
+.kanban {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  overflow: visible;
+}
+
+.kanbanColumn {
+  background-color: var(--color-bg-alt);
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+}
+
+.columnHeader {
+  padding: 14px;
+  border-bottom: 1px solid var(--color-border);
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-primary);
+  color: white;
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+  border-radius: 50%;
+}
+
+.columnItems {
+  padding: 12px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ticket {
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.inboxPanel {
+  grid-area: inbox;
+  border-left: 1px solid var(--color-border);
+  background-color: var(--color-bg-alt);
+  display: flex;
+  flex-direction: column;
+}
+
+.inboxHeader {
+  padding: 14px;
+  border-bottom: 1px solid var(--color-border);
+  font-weight: 600;
+  text-align: center;
+  font-size: 16px;
+}
+
+.noMessages {
+  padding: 20px;
+  text-align: center;
+  color: var(--color-text-dim);
+  margin-top: 20px;
+}
+
+/* Responsive styles */
+@media (max-width: 1024px) {
+  .dashboard {
+    grid-template-columns: 200px 1fr 0;
+    grid-template-areas:
+      "sidebar header header"
+      "sidebar content content";
+  }
+  
+  .inboxPanel {
+    display: none;
+  }
+  
+  .statCards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "header"
+      "content";
+  }
+  
+  .sidebar {
+    display: none;
+  }
+  
+  .header {
+    padding: 15px;
+  }
+  
+  .content {
+    padding: 15px;
+  }
+  
+  .kanban {
+    display: flex;
+    overflow-x: auto;
+    padding-bottom: 16px;
+  }
+  
+  .kanbanColumn {
+    flex: 0 0 250px;
+  }
+}
