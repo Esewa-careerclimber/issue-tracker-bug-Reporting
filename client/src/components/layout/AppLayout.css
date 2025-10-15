@@ -1,24 +1,533 @@
-.appLayout{display:grid;grid-template-columns:240px 1fr 300px;min-height:100dvh;overflow:hidden;background:var(--color-bg);color:var(--color-text);}
-.appSidebar{border-right:1px solid var(--color-border);background:var(--color-surface);display:flex;flex-direction:column;padding:12px 14px;gap:20px;}
-.sideNav .brandRow{font-size:18px;font-weight:600;letter-spacing:.5px;}
-.navGroup{display:flex;flex-direction:column;gap:2px;}
-.navLabel{font-size:11px;text-transform:uppercase;margin-top:14px;opacity:.6;letter-spacing:.5px;}
-.navItem{padding:8px 10px;border-radius:6px;font-size:14px;text-decoration:none;color:inherit;display:block;transition:background .15s;}
-.navItem:hover{background:var(--color-hover);}
-.navItem.active{background:var(--color-accent);color:#fff;}
-.mainRegion{display:flex;flex-direction:column;min-width:0;}
-.topBarWrap{border-bottom:1px solid var(--color-border);background:linear-gradient(to right,var(--color-surface),var(--color-surface-alt));}
-.topBar{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;gap:16px;}
-.tbTitle{font-size:20px;margin:0;font-weight:600;}
-.modeToggle{background:var(--color-surface-alt);border:1px solid var(--color-border);padding:6px 12px;border-radius:6px;font-size:13px;cursor:pointer;color:inherit;}
-.modeToggle:hover{background:var(--color-hover);}
-.contentWrap{padding:20px;min-height:0;overflow:auto;}
-.rightPanel{border-left:1px solid var(--color-border);background:var(--color-surface);display:flex;flex-direction:column;}
-.inboxPanel{display:flex;flex-direction:column;height:100%;}
-.panelHead{padding:12px 16px;font-weight:600;border-bottom:1px solid var(--color-border);}
-.inboxList{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:8px;}
-.inboxItem{background:var(--color-surface-alt);border:1px solid var(--color-border);padding:10px 12px;border-radius:6px;font-size:13px;}
+.appLayout{
+  display: grid;
+  grid-template-columns: 260px 1fr 320px;
+  min-height: 100dvh;
+  overflow: hidden;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.appSidebar{
+  border-right: 1px solid var(--color-border);
+  background: var(--color-surface);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 16px;
+  gap: 30px;
+  overflow-y: auto;
+  z-index: 100;
+  transition: transform 0.3s ease;
+}
+
+.sidebarOverlay, .notificationOverlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 90;
+}
+
+.sideNav {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.brandRow{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 8px;
+  margin-bottom: 10px;
+}
+
+.logoIcon {
+  font-size: 24px;
+}
+
+.logoText {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.navGroup{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.navLabel{
+  font-size: 12px;
+  text-transform: uppercase;
+  padding: 0 12px;
+  margin-bottom: 8px;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.navItem{
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.navItem:hover{
+  background: var(--color-hover);
+}
+
+.navItem.active{
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.upgradeCard {
+  margin-top: auto;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin: 16px 0;
+}
+
+.upgradeIcon {
+  font-size: 28px;
+  margin-bottom: 12px;
+}
+
+.upgradeCard h3 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.upgradeCard p {
+  margin: 0 0 16px 0;
+  font-size: 13px;
+  opacity: 0.9;
+  line-height: 1.4;
+}
+
+.upgradeBtn {
+  background: white;
+  color: #6366f1;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.upgradeBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.mainRegion{
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.topBarWrap{
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.topBar{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  height: 64px;
+}
+
+.tbLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.menuToggle {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--color-text);
+  cursor: pointer;
+  padding: 6px;
+}
+
+.logoMobile {
+  display: none;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.tbRight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.searchWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchWrap svg {
+  position: absolute;
+  left: 12px;
+  color: var(--color-text-muted);
+}
+
+.searchInput {
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 8px 12px 8px 38px;
+  font-size: 14px;
+  width: 220px;
+  color: var(--color-text);
+}
+
+.searchInput::placeholder {
+  color: var(--color-text-muted);
+}
+
+.topbarBtn {
+  background: none;
+  border: none;
+  color: var(--color-text);
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.topbarBtn:hover {
+  background: var(--color-hover);
+}
+
+.notifBadge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  background: #ef4444;
+  border-radius: 50%;
+}
+
+.userProfile {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.avatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.contentWrap{
+  padding: 24px 32px;
+  min-height: 0;
+  overflow: auto;
+}
+
+.rightPanel{
+  border-left: 1px solid var(--color-border);
+  background: var(--color-surface);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.inboxPanel{
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.panelHead{
+  padding: 20px;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.panelHead h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.clearBtn {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.clearBtn:hover {
+  text-decoration: underline;
+}
+
+.notificationTabs {
+  display: flex;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.notifTab {
+  flex: 1;
+  text-align: center;
+  padding: 12px;
+  font-size: 14px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.notifTab.active {
+  color: var(--color-accent);
+  border-bottom: 2px solid var(--color-accent);
+  font-weight: 500;
+}
+
+.inboxList{
+  flex: 1;
+  overflow: auto;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.notificationItem {
+  display: flex;
+  gap: 14px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  position: relative;
+}
+
+.notificationItem.unread::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 60%;
+  background: var(--color-accent);
+  border-radius: 2px;
+}
+
+.notificationItem:hover {
+  background: var(--color-surface-alt);
+}
+
+.notifIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.notifIcon.update {
+  background: rgba(99, 102, 241, 0.1);
+  color: #6366f1;
+}
+
+.notifIcon.mention {
+  background: rgba(249, 115, 22, 0.1);
+  color: #f97316;
+}
+
+.notifIcon.system {
+  background: rgba(234, 179, 8, 0.1);
+  color: #eab308;
+}
+
+.notifContent {
+  flex: 1;
+}
+
+.notifTitle {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.notificationItem.unread .notifTitle {
+  color: var(--color-text);
+}
+
+.notifMessage {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+
+.notifTime {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.notifActions {
+  color: var(--color-text-muted);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+
+.viewAllNotifs {
+  padding: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+.viewAllBtn {
+  width: 100%;
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--color-text);
+  transition: all 0.2s ease;
+}
+
+.viewAllBtn:hover {
+  background: var(--color-hover);
+}
 
 /* Responsive */
-@media (max-width:1200px){.appLayout{grid-template-columns:220px 1fr;} .rightPanel{display:none;}}
-@media (max-width:850px){.appLayout{grid-template-columns:1fr;} .appSidebar{position:fixed;inset:0 60% 0 0;z-index:30;box-shadow:2px 0 8px rgba(0,0,0,.4);} }
+@media (max-width: 1280px) {
+  .appLayout {
+    grid-template-columns: 260px 1fr 0;
+  }
+  
+  .rightPanel {
+    position: fixed;
+    inset: 0 0 0 auto;
+    width: 320px;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    box-shadow: -4px 0 16px rgba(0,0,0,0.2);
+  }
+  
+  .rightPanel.open {
+    transform: translateX(0);
+  }
+  
+  .notificationOverlay {
+    display: block;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s;
+  }
+  
+  .notificationOverlay.open {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+@media (max-width: 991px) {
+  .appLayout {
+    grid-template-columns: 0 1fr 0;
+  }
+  
+  .appSidebar {
+    position: fixed;
+    inset: 0 40% 0 0;
+    transform: translateX(-100%);
+    box-shadow: 4px 0 16px rgba(0,0,0,0.2);
+  }
+  
+  .appSidebar.open {
+    transform: translateX(0);
+  }
+  
+  .sidebarOverlay {
+    display: block;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s;
+  }
+  
+  .sidebarOverlay.open {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  .menuToggle {
+    display: flex;
+  }
+  
+  .logoMobile {
+    display: block;
+  }
+}
+
+@media (max-width: 768px) {
+  .appSidebar {
+    inset: 0 20% 0 0;
+  }
+  
+  .contentWrap {
+    padding: 16px 20px;
+  }
+  
+  .searchInput {
+    width: 160px;
+  }
+}
+
+@media (max-width: 576px) {
+  .appSidebar {
+    inset: 0 80px 0 0;
+  }
+  
+  .searchWrap {
+    display: none;
+  }
+  
+  .upgradeCard {
+    display: none;
+  }
+}

@@ -1,11 +1,14 @@
-.statGrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+.issueNavContainer {
   margin-bottom: 20px;
 }
 
-.statCard {
+.issueNavGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.issueNavCard {
   background: white;
   border-radius: 8px;
   padding: 16px 18px;
@@ -14,24 +17,24 @@
   gap: 6px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
-  border-left: 4px solid;
 }
 
-.statCard:hover {
+.issueNavCard:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-.statValue {
+.issueNavValue {
   font-size: 30px;
   font-weight: 600;
   line-height: 1;
   text-align: center;
 }
 
-.statLabel {
+.issueNavLabel {
   font-size: 14px;
   font-weight: 500;
   text-align: center;
@@ -39,30 +42,30 @@
 
 /* Card color variations */
 .redCard {
-  border-left-color: #ef4444;
+  border-left: 4px solid #ef4444;
 }
 
 .greenCard {
-  border-left-color: #10b981;
+  border-left: 4px solid #10b981;
 }
 
 .blueCard {
-  border-left-color: #3b82f6;
+  border-left: 4px solid #3b82f6;
 }
 
 .purpleCard {
-  border-left-color: #8b5cf6;
+  border-left: 4px solid #8b5cf6;
 }
 
-/* Responsive adjustments */
-@media (max-width: 991px) {
-  .statGrid {
+/* Responsive styles */
+@media (max-width: 992px) {
+  .issueNavGrid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (max-width: 480px) {
-  .statGrid {
+@media (max-width: 576px) {
+  .issueNavGrid {
     grid-template-columns: 1fr;
   }
 }

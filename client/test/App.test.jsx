@@ -8,10 +8,10 @@ describe('App', () => {
     expect(screen.getByRole('main')).toBeInTheDocument()
   })
 
-  it('displays the dashboard heading', () => {
+  it('displays the dashboard link', () => {
     render(<App />)
-    // Use a more specific selector that targets the page title
-    const heading = screen.getByText(/Dashboard/i, { selector: '.pageTitle' })
-    expect(heading).toBeInTheDocument()
+    // Look for the dashboard link in the navigation instead
+    const dashboardLink = screen.getByText(/Dashboard/i, { selector: '.navLink' })
+    expect(dashboardLink).toBeInTheDocument()
   })
 })

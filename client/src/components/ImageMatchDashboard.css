@@ -1,0 +1,434 @@
+/* Import Google Fonts - Inter */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Reset and base styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+.dashboardContainer {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  min-height: 100vh;
+  background-color: #f8fafc;
+  color: #1e293b;
+}
+
+/* Top Navigation */
+.topNav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: white;
+  padding: 0.75rem 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.leftNav {
+  display: flex;
+  align-items: center;
+}
+
+.brandLogo {
+  display: flex;
+  align-items: center;
+  margin-right: 4rem;
+}
+
+.caterpillar {
+  font-size: 1.75rem;
+  margin-right: 0.5rem;
+}
+
+.brandName {
+  margin: 0;
+  color: #2563eb;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.navLinks {
+  display: flex;
+  gap: 2.5rem;
+}
+
+.navLink {
+  text-decoration: none;
+  color: #64748b;
+  font-weight: 500;
+  font-size: 1rem;
+  padding: 0.5rem 0;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.navLink:hover {
+  color: #2563eb;
+}
+
+.navLink.active {
+  color: #2563eb;
+  border-bottom: 2px solid #2563eb;
+}
+
+.rightNav {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.themeToggle {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f1f5f9;
+  transition: all 0.2s ease;
+}
+
+.themeToggle:hover {
+  background-color: #e2e8f0;
+}
+
+.themeToggle:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+.notificationIcon {
+  font-size: 1.25rem;
+  color: #64748b;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.notificationIcon:hover {
+  color: #2563eb;
+}
+
+.userAvatar {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background-color: #e2e8f0;
+  border: 2px solid #cbd5e1;
+}
+
+/* Main Content */
+.mainContent {
+  padding: 2rem;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+/* Stats Cards */
+.statsContainer {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.statCard {
+  background: white;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.statCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.redCard {
+  border-left: 5px solid #ef4444;
+}
+
+.greenCard {
+  border-left: 5px solid #10b981;
+}
+
+.blueCard {
+  border-left: 5px solid #3b82f6;
+}
+
+.purpleCard {
+  border-left: 5px solid #8b5cf6;
+}
+
+.statValue {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #0f172a;
+}
+
+.statLabel {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #64748b;
+  text-align: center;
+}
+
+/* Reports Section */
+.reportsSection {
+  background: white;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.reportHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.reportHeader h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.searchBox {
+  max-width: 320px;
+  width: 100%;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.75rem 1.25rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  color: #0f172a;
+  background-color: #f8fafc;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.searchInput:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+  background-color: white;
+}
+
+.searchInput::placeholder {
+  color: #94a3b8;
+}
+
+.reportContent {
+  min-height: 300px;
+}
+
+/* Dark mode support */
+[data-theme="dark"] .dashboardContainer {
+  background-color: #0f172a;
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .topNav {
+  background-color: #1e293b;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .brandName {
+  color: #60a5fa;
+}
+
+[data-theme="dark"] .navLink {
+  color: #cbd5e1;
+}
+
+[data-theme="dark"] .navLink:hover {
+  color: #60a5fa;
+}
+
+[data-theme="dark"] .navLink.active {
+  color: #60a5fa;
+  border-bottom-color: #60a5fa;
+}
+
+[data-theme="dark"] .themeToggle {
+  background-color: #334155;
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .themeToggle:hover {
+  background-color: #475569;
+}
+
+[data-theme="dark"] .themeToggle:focus {
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.3);
+}
+
+[data-theme="dark"] .notificationIcon {
+  color: #cbd5e1;
+}
+
+[data-theme="dark"] .notificationIcon:hover {
+  color: #60a5fa;
+}
+
+[data-theme="dark"] .userAvatar {
+  background-color: #334155;
+  border-color: #475569;
+}
+
+[data-theme="dark"] .statCard {
+  background-color: #1e293b;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .statCard:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .statValue {
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .statLabel {
+  color: #cbd5e1;
+}
+
+[data-theme="dark"] .reportsSection {
+  background-color: #1e293b;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .reportHeader h2 {
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .searchInput {
+  border-color: #334155;
+  color: #f8fafc;
+  background-color: #334155;
+}
+
+[data-theme="dark"] .searchInput:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.3);
+  background-color: #1e293b;
+}
+
+[data-theme="dark"] .searchInput::placeholder {
+  color: #94a3b8;
+}
+
+/* Responsive styles */
+@media (max-width: 1200px) {
+  .mainContent {
+    padding: 2rem 1.5rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .statsContainer {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+  
+  .statCard {
+    padding: 1.25rem;
+  }
+  
+  .navLinks {
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .topNav {
+    padding: 0.75rem 1.25rem;
+  }
+  
+  .navLinks {
+    display: none;
+  }
+  
+  .brandLogo {
+    margin-right: 0;
+  }
+  
+  .searchBox {
+    max-width: 100%;
+  }
+  
+  .mainContent {
+    padding: 1.5rem 1rem;
+  }
+  
+  .reportsSection {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .statsContainer {
+    grid-template-columns: 1fr;
+  }
+  
+  .reportHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .reportContent {
+    min-height: 200px;
+  }
+  
+  .statValue {
+    font-size: 2rem;
+  }
+}
+
+/* Handle ultra-wide screens */
+@media (min-width: 1600px) {
+  .mainContent {
+    max-width: 1440px;
+  }
+}
+
+/* Print styles for better reports */
+@media print {
+  .topNav {
+    position: static;
+    box-shadow: none;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  
+  .statCard {
+    box-shadow: none;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .reportsSection {
+    box-shadow: none;
+    border: 1px solid #e2e8f0;
+  }
+}
