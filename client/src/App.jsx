@@ -2,12 +2,12 @@ import React from 'react';
 import './App.css';
 import './theme/tokens.css';
 import { ThemeProvider } from './components/ThemeProvider';
-import { Dashboard } from './components/Dashboard';
+import { ImageMatchDashboard } from './components/ImageMatchDashboard';
 
-function App(){
+function App() {
   return (
     <ThemeProvider>
-      <Dashboard />
+      <ImageMatchDashboard />
     </ThemeProvider>
   );
 }
