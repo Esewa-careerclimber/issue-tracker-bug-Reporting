@@ -17,7 +17,7 @@ COPY . .
 RUN rm -rf node_modules package-lock.json && npm install
 
 # Expose server port
-EXPOSE 5000
+EXPOSE 5001
 
 # Start the development server
 CMD ["npm", "run", "dev"]
