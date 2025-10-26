@@ -1,24 +1,24 @@
 services:
   # MongoDB Database
-  mongodb:
-    image: mongo:7
-    container_name: issue-tracker-mongodb
-    restart: unless-stopped
-    ports:
-      - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password
-      MONGO_INITDB_DATABASE: issue_tracker
-    volumes:
-      - mongodb_data:/data/db
-    networks:
-      - issue-tracker-network
-    healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
+  # mongodb:
+  #   image: mongo:7
+  #   container_name: issue-tracker-mongodb
+  #   restart: unless-stopped
+  #   ports:
+  #     - "27017:27017"
+  #   environment:
+  #     MONGO_INITDB_ROOT_USERNAME: admin
+  #     MONGO_INITDB_ROOT_PASSWORD: password
+  #     MONGO_INITDB_DATABASE: issue_tracker
+  #   volumes:
+  #     - mongodb_data:/data/db
+  #   networks:
+  #     - issue-tracker-network
+  #   healthcheck:
+  #     test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 3
 
   # Backend Server
   server:
@@ -26,20 +26,21 @@ services:
     container_name: issue-tracker-server
     restart: unless-stopped
     ports:
-      - "5000:5000"
+      - "5001:5001"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
       interval: 10s
       timeout: 5s
       retries: 3
     environment:
       - NODE_ENV=development
-      - PORT=5000
-      - MONGO_URI=mongodb://admin:password@mongodb:27017/issue_tracker?authSource=admin
-    depends_on:
-      - mongodb
-    networks:
-      - issue-tracker-network
+      - PORT=5001
+      - MONGODB_URI=mongodb+srv://lina:buterflybuterfly@cluster0.nm0v4us.mongodb.net/issue_tracker?retryWrites=true&w=majority&appName=Cluster0
+      - JWT_SECRET=${JWT_SECRET}
+    # depends_on:
+    #   - mongodb
+    # networks:
+    #   - issue-tracker-network
     volumes:
       - ./server:/app
       - /app/node_modules
