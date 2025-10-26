@@ -24,16 +24,6 @@ jobs:
   server-test:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    services:
-      mongo:
-        image: mongo:7
-        ports:
-          - 27017:27017
-        options: >-
-          --health-cmd="mongosh --quiet --eval 'db.adminCommand({ping:1})'"
-          --health-interval=5s
-          --health-timeout=5s
-          --health-retries=12
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -53,7 +43,8 @@ jobs:
         working-directory: server
         env:
             NODE_ENV: test
-            MONGO_URI: mongodb://localhost:27017/issue_tracker_test
+            MONGODB_URI: ${{ secrets.MONGODB_URI }}
+            JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: npm test -- --ci
 
       - name: Upload coverage (optional)
@@ -116,24 +107,15 @@ jobs:
       - name: Start stack
         run: docker compose up -d
 
-      - name: Wait for Mongo
-        run: |
-          for i in {1..30}; do
-            if docker compose exec -T mongodb mongosh --quiet --eval 'db.adminCommand({ping:1})' >/dev/null 2>&1; then
-              echo "Mongo ready"; break
-            fi
-            sleep 2
-          done
-
       - name: Wait for server
         run: |
           for i in {1..30}; do
-            if curl -fs http://localhost:5000/health >/dev/null 2>&1; then
+            if curl -fs http://localhost:5001/health >/dev/null 2>&1; then
               echo "Server healthy"; break
             fi
             sleep 2
           done
-          curl -f http://localhost:5000/health
+          curl -f http://localhost:5001/health
 
       - name: Show containers
         run: docker compose ps
@@ -143,8 +125,7 @@ jobs:
         run: |
           echo "--- Server logs ---"
           docker compose logs server || true
-          echo "--- Mongo logs ---"
-          docker compose logs mongodb || true
+          
 
       - name: Shutdown
         if: always()
