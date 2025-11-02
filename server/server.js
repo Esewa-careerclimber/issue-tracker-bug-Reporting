@@ -3,7 +3,10 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.js';
-
+import userTicketRoutes from './routes/user/tickets.js';
+import adminTicketRoutes from './routes/admin/tickets.js';
+import userCommentRoutes from './routes/user/comments.js';
+import adminCommentRoutes from './routes/admin/comments.js';
 
 dotenv.config();
 const app = express();
@@ -16,6 +19,10 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/user/tickets', userTicketRoutes);
+app.use('/api/admin/tickets', adminTicketRoutes);
+app.use('/api/user/comments', userCommentRoutes);
+app.use('/api/admin/comments', adminCommentRoutes);
 
 // Health Check Route
 app.get('/health', (req, res) => {
