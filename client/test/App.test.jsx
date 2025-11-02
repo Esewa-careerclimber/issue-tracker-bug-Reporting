@@ -1,6 +1,14 @@
 import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
+import { BrowserRouter } from 'react-router-dom'
 import App from '../src/App'
+
+// Wrapper component for Router
+const AppWithRouter = () => (
+  <BrowserRouter>
+    <App />
+  </BrowserRouter>
+)
 
 describe('App', () => {
   it('renders main landmark', () => {

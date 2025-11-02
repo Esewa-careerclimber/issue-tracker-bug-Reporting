@@ -1,18 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import './ImageMatchDashboard.css';
 import { useTheme } from './ThemeProvider';
+import './ImageMatchDashboard.css';
 
-// These match the exact values in the image
-const issueTypes = [
-  { label: 'Bug Reports', value: 47, color: 'red' },
-  { label: 'Feature Requests', value: 23, color: 'green' },
-  { label: 'Support Requests', value: 18, color: 'blue' },
-  { label: 'General Feedback', value: 51, color: 'purple' },
-];
-
-export function ImageMatchDashboard() {
-  const [searchText, setSearchText] = useState('');
+export function Layout({ children }) {
   const { theme, toggle } = useTheme();
   const location = useLocation();
   
@@ -48,33 +39,7 @@ export function ImageMatchDashboard() {
       </nav>
       
       <main className="mainContent">
-        <div className="statsContainer">
-          {issueTypes.map(type => (
-            <div key={type.label} className={`statCard ${type.color}Card`}>
-              <div className="statValue">{type.value}</div>
-              <div className="statLabel">{type.label}</div>
-            </div>
-          ))}
-        </div>
-        
-        <div className="reportsSection">
-          <div className="reportHeader">
-            <h2>All Community Reports</h2>
-            <div className="searchBox">
-              <input 
-                type="text"
-                placeholder="Search issues..."
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                className="searchInput"
-              />
-            </div>
-          </div>
-          
-          <div className="reportContent">
-            {/* Empty content to match the image */}
-          </div>
-        </div>
+        {children}
       </main>
     </div>
   );

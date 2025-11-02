@@ -74,30 +74,32 @@
   margin-bottom: 0.6rem;
 }
 
-.tag {
+.tag,
+.badge,
+.status {
   font-size: 0.8rem;
   padding: 0.25rem 0.6rem;
   border-radius: 12px;
   font-weight: 500;
 }
 
-
-.tag.type.bug {
+/* Badge styles for issue types */
+.badge.bug {
   background-color: #fee2e2;
   color: #b91c1c;
 }
 
-.tag.type.feature {
+.badge.feature {
   background-color: #dbeafe;
   color: #2563eb;
 }
 
-.tag.type.support {
+.badge.support {
   background-color: #dcfce7;
   color: #166534;
 }
 
-.tag.type.feedback {
+.badge.feedback {
   background-color: #ede9fe;
   color: #7c3aed;
 }
@@ -124,22 +126,22 @@
 }
 
 /* Status Tags */
-.tag.status.open {
+.status.open {
   background-color: #dcfce7;
   color: #166534;
 }
 
-.tag.status.in-progress {
+.status.in-progress {
   background-color: #fef3c7;
   color: #78350f;
 }
 
-.tag.status.reviewed {
+.status.reviewed {
   background-color: #e0e7ff;
   color: #3730a3;
 }
 
-.tag.status.closed {
+.status.closed {
   background-color: #fee2e2;
   color: #b91c1c;
 }
@@ -154,4 +156,48 @@
   .filters select {
     width: 100%;
   }
+}
+
+/* Dark mode support */
+[data-theme="dark"] .issues-page {
+  background-color: #0f172a;
+}
+
+[data-theme="dark"] .issues-header h1 {
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .issues-header p {
+  color: #cbd5e1;
+}
+
+[data-theme="dark"] .filters select {
+  background-color: #1e293b;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .issue-card {
+  background-color: #1e293b;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .issue-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .issue-card h3 {
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .issue-card p {
+  color: #cbd5e1;
+}
+
+[data-theme="dark"] .issue-card small {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .empty-state {
+  color: #cbd5e1;
 }
