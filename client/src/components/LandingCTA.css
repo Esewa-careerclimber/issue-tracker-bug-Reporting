@@ -1,0 +1,84 @@
+:root {
+  --primary: #00b4d8;                    /* Aqua blue from LandingIntro */
+  --primary-hover: #009ac2;              /* Darker aqua from LandingIntro */
+  --foreground: hsl(220, 40%, 15%);
+  --muted-foreground: hsl(220, 15%, 45%);
+  --background-light: hsl(193, 95%, 97%);
+}
+
+.cta-section {
+  background: var(--background-light);
+  padding: 100px 20px;
+  text-align: center;
+  border-radius: 8px;
+}
+
+.cta-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.cta-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--foreground);
+  margin-bottom: 12px;
+}
+
+.cta-subtitle {
+  font-size: 1.125rem;
+  color: var(--muted-foreground);
+  margin-bottom: 36px;
+}
+
+.brand {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.cta-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* ✨ Refined Primary Button */
+.btn-primary {
+  background-color: var(--primary);
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  padding: 14px 32px;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 180, 216, 0.25);
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 180, 216, 0.35);
+}
+
+/* ✨ Refined Outline Button */
+.btn-outline {
+  background-color: transparent;
+  color: var(--primary);
+  font-weight: 600;
+  border: 2px solid var(--primary);
+  border-radius: 10px;
+  padding: 12px 30px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-outline:hover {
+  background-color: #e0f7fa;
+  transform: translateY(-2px);
+  color: var(--primary-hover);
+  border-color: var(--primary-hover);
+}

@@ -1,0 +1,80 @@
+.landing-container {
+  text-align: center;
+  background: linear-gradient(to bottom, #ffffff, #e6f7ff);
+  padding: 100px 20px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.landing-title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: #0a0a0a;
+  margin-bottom: 20px;
+}
+
+.highlight {
+  color: #00b4d8;
+}
+
+.landing-subtitle {
+  color: #555;
+  font-size: 1.2rem;
+  max-width: 700px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.button-group {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .button-group {
+    flex-direction: row;
+    justify-content: center;
+  }
+}
+
+.primary-btn {
+  background-color: #00b4d8;
+  color: white;
+  border: none;
+  padding: 14px 36px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.primary-btn:hover {
+  background-color: #009ac2;
+  transform: translateY(-2px);
+}
+
+.secondary-btn {
+  background-color: transparent;
+  color: #00b4d8;
+  border: 2px solid #00b4d8;
+  padding: 12px 34px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.secondary-btn:hover {
+  background-color: #e0f7fa;
+  transform: translateY(-2px);
+}
+
+.footer-note {
+  margin-top: 30px;
+  color: #999;
+  font-size: 0.9rem;
+}

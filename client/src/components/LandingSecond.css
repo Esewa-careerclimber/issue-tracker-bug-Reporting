@@ -1,0 +1,90 @@
+:root {
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(220, 40%, 15%);
+  --primary: hsl(193, 100%, 42%);
+  --primary-glow: hsl(193, 100%, 55%);
+  --muted-foreground: hsl(220, 15%, 45%);
+  --border: hsl(220, 15%, 90%);
+  --card: hsl(0, 0%, 100%);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: "Inter", sans-serif;
+}
+
+.landing-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 80px 24px;
+  text-align: center;
+}
+
+.landing-header {
+  max-width: 720px;
+  margin: 0 auto 64px;
+}
+
+.landing-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--foreground);
+}
+
+.landing-subtitle {
+  font-size: 1.125rem;
+  color: var(--muted-foreground);
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 32px;
+}
+
+.feature-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 32px 24px;
+  text-align: left;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.03);
+}
+
+.feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 20px hsl(193 100% 42% / 0.3);
+}
+
+.icon-wrapper {
+  height: 48px;
+  width: 48px;
+  background-color: hsla(193, 100%, 42%, 0.1);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.icon-wrapper svg {
+  color: var(--primary);
+  font-size: 20px;
+}
+
+.feature-card h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--foreground);
+  margin-bottom: 8px;
+}
+
+.feature-card p {
+  font-size: 0.95rem;
+  color: var(--muted-foreground);
+  line-height: 1.6;
+}
