@@ -16,8 +16,8 @@ function App() {
     <ThemeProvider>
       <Router>
         <Routes>
-          {/* Landing page without Layout */}
-          <Route path="/landing" element={<HomePage />} />
+          {/* Landing page as main page */}
+          <Route path="/" element={<HomePage />} />
           
           {/* Auth pages without Layout */}
           <Route path="/login" element={<Login />} />
@@ -25,7 +25,7 @@ function App() {
           
           {/* App pages with Layout */}
           <Route element={<Layout />}>
-            <Route path="/" element={<DashboardPage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/my-issues" element={<MyIssuesPage />} />
             <Route path="/report" element={<ReportIssuePage />} />
           </Route>

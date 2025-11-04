@@ -14,7 +14,7 @@ const LandingIntro = () => {
   }
 
   const handleViewDemo = () => {
-    navigate('/')
+    navigate('/dashboard')
   }
 
   return (
