@@ -33,7 +33,7 @@ const Login = () => {
     
     // Route based on role
     if (formData.role === 'admin') {
-      navigate('/')
+      navigate('/dashboard')
     } else if (formData.role === 'user') {
       navigate('/my-issues')
     } else {
@@ -131,7 +131,7 @@ const Login = () => {
         </div>
       </div>
 
-      <Link to="/landing" className="back-to-home">
+      <Link to="/" className="back-to-home">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
           <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
