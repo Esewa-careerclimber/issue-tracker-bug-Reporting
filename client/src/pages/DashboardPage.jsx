@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { IssueNav } from '../components/IssueNav';
 import './DashboardPage.css';
 
 // This will be shared data across pages
@@ -135,6 +136,12 @@ export default function DashboardPage() {
           <p className="page-subtitle">Overview of all reported issues</p>
         </div>
       </div>
+
+      {/* Issue Category Navigation */}
+      <IssueNav onCategorySelect={(category) => {
+        console.log('Selected category:', category);
+        // Can be used to filter by type in the future
+      }} />
 
       <div className="metrics-grid-modern">
         {metrics.map((metric, index) => (
