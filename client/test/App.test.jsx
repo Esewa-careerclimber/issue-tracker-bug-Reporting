@@ -11,15 +11,15 @@ const AppWithRouter = () => (
 )
 
 describe('App', () => {
-  it('renders main landmark', () => {
+  it('renders the landing page heading', () => {
     render(<App />)
-    expect(screen.getByRole('main')).toBeInTheDocument()
+    const heading = screen.getByText(/Got an Issue with Your Team/i)
+    expect(heading).toBeInTheDocument()
   })
 
-  it('displays the dashboard link', () => {
+  it('displays the Access Your Workspace section', () => {
     render(<App />)
-    // Look for the dashboard link in the navigation instead
-    const dashboardLink = screen.getByText(/Dashboard/i, { selector: '.navLink' })
-    expect(dashboardLink).toBeInTheDocument()
+    const workspaceHeading = screen.getByText(/Access Your Workspace/i)
+    expect(workspaceHeading).toBeInTheDocument()
   })
 })
