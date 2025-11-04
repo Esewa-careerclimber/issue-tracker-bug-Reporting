@@ -69,3 +69,21 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Dark mode support */
+[data-theme="dark"] .issueNavCard {
+  background: #1e293b;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .issueNavCard:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .issueNavValue {
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .issueNavLabel {
+  color: #cbd5e1;
+}

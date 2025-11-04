@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, Outlet } from 'react-router-dom';
 import { useTheme } from './ThemeProvider';
 import './ImageMatchDashboard.css';
 
-export function Layout({ children }) {
+export function Layout() {
   const { theme, toggle } = useTheme();
   const location = useLocation();
   
@@ -39,7 +39,7 @@ export function Layout({ children }) {
       </nav>
       
       <main className="mainContent">
-        {children}
+        <Outlet />
       </main>
     </div>
   );
