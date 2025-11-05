@@ -1,39 +1,42 @@
 import express from 'express';
-import Ticket from '../../models/Ticket.js';
 import { summarize } from '../../services/ai/summarizer.js';
 import { identifySeverity } from '../../services/ai/severity.js';
 import { protect as authenticate } from '../../middleware/auth.js';
+import { validate } from '../../middleware/validator.js';
+import { upload } from '../../middleware/upload.js';
+import {
+  createTicket,
+  getUserTickets,
+  getSingleTicket
+} from '../../controllers/user/ticketController.js';
 
 const router = express.Router();
 
 // Create ticket
-router.post('/', authenticate, async (req, res) => {
-  try {
-    const summary = summarize(req.body.description);
-    const severity = identifySeverity(req.body.description);
-    const ticket = await Ticket.create({
-      ...req.body,
-      summary,
-      severity,
-      createdBy: req.user.id
-    });
-    res.status(201).json(ticket);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
+router.post(
+  '/',
+  authenticate,
+  upload.single('image'),
+  validate(['title', 'description', 'category']),
+  async (req, res) => {
+    req.body.summary = await summarize(req.body.description);
+    req.body.severity = await identifySeverity(req.body.description);
+    if (req.file) {
+      req.body.image = req.file.path.replace(/\\/g, '/');
+    }
+    return createTicket(req, res);
   }
-});
+);
 
 // Get all tickets for the logged-in user
-router.get('/', authenticate, async (req, res) => {
-  const tickets = await Ticket.find({ createdBy: req.user.id }).populate('comments');
-  res.json(tickets);
-});
+router.get('/', authenticate, getUserTickets);
 
 // Get a single ticket (if owned by user)
-router.get('/:id', authenticate, async (req, res) => {
-  const ticket = await Ticket.findOne({ _id: req.params.id, createdBy: req.user.id }).populate('comments');
-  if (!ticket) return res.status(404).json({ message: 'Ticket not found' });
-  res.json(ticket);
+router.get('/:id', authenticate, getSingleTicket);
+
+// Debug route to inspect req.body for form-data requests
+router.post('/debug', upload.none(), (req, res) => {
+  res.json(req.body);
 });
 
 export default router;

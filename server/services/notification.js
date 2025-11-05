@@ -1,5 +1,6 @@
-export function sendNotification(userId, message) {
-  // TODO: Implement actual notification logic (email, in-app, etc.)
-  // For now, just log to console
-  console.log(`Notify user ${userId}: ${message}`);
+import Notification from '../models/Notification.js';
+
+// Save notification to the database for in-app display
+export async function sendNotification(userId, message) {
+  await Notification.create({ user: userId, message });
 }

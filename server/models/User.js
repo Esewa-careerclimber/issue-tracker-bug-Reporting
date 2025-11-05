@@ -30,6 +30,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: function() { return this.role === 'admin'; }
   },
+  active: { 
+    type: Boolean, 
+    default: true 
+  },
   createdAt: {
     type: Date,
     default: Date.now

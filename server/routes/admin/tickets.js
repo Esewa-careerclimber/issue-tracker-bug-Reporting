@@ -1,27 +1,20 @@
 import express from 'express';
-import Ticket from '../../models/Ticket.js';
 import { protect as authenticate, admin as isAdmin } from '../../middleware/auth.js';
+import {
+  getAllTickets,
+  updateTicketStatus,
+  assignTicket
+} from '../../controllers/admin/ticketController.js';
 
 const router = express.Router();
 
 // Get all tickets
-router.get('/', authenticate, isAdmin, async (req, res) => {
-  const tickets = await Ticket.find().populate('createdBy assignedTo comments');
-  res.json(tickets);
-});
+router.get('/', authenticate, isAdmin, getAllTickets);
 
 // Update ticket status
-router.patch('/:id/status', authenticate, isAdmin, async (req, res) => {
-  const { status } = req.body;
-  const ticket = await Ticket.findByIdAndUpdate(req.params.id, { status }, { new: true });
-  res.json(ticket);
-});
+router.patch('/:id/status', authenticate, isAdmin, updateTicketStatus);
 
 // Assign ticket to a user
-router.patch('/:id/assign', authenticate, isAdmin, async (req, res) => {
-  const { assignedTo } = req.body;
-  const ticket = await Ticket.findByIdAndUpdate(req.params.id, { assignedTo }, { new: true });
-  res.json(ticket);
-});
+router.patch('/:id/assign', authenticate, isAdmin, assignTicket);
 
 export default router;
