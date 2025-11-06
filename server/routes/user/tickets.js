@@ -19,8 +19,17 @@ router.post(
   upload.single('image'),
   validate(['title', 'description', 'category']),
   async (req, res) => {
-    req.body.summary = await summarize(req.body.description);
-    req.body.severity = await identifySeverity(req.body.description);
+    // req.body.summary = await summarize(req.body.description);
+    // req.body.severity = await identifySeverity(req.body.description);
+    // Only call AI services in non-test environments
+    if (process.env.NODE_ENV !== 'test') {
+      req.body.summary = await summarize(req.body.description);
+      req.body.severity = await identifySeverity(req.body.description);
+    } else {
+      // Use defaults for testing
+      req.body.summary = 'Test summary';
+      req.body.severity = 'medium';
+    }
     if (req.file) {
       req.body.image = req.file.path.replace(/\\/g, '/');
     }

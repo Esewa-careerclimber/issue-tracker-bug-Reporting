@@ -6,6 +6,9 @@ services:
     restart: unless-stopped
     ports:
       - "5001:5001"
+    dns:                    
+      - 8.8.8.8            
+      - 8.8.4.4 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
       interval: 10s

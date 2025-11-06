@@ -71,14 +71,13 @@ describe("Server API Tests", () => {
 
   describe("Ticket and Comment API", () => {
     it("should create a ticket with image as user", async () => {
-      // Use a valid image path. Place a small PNG file named 'test-image.png' in the 'server/tests' folder.
       const res = await request(app)
         .post("/api/user/tickets")
         .set("Authorization", `Bearer ${userToken}`)
         .field("title", "Bug with screenshot")
         .field("description", "Dashboard not loading")
         .field("category", "bug")
-        .attach("image", path.resolve("server/tests/login.png"));
+        .attach("image", path.resolve("uploads/tickets/SignupBug.png"));
       expect(res.statusCode).toBe(201);
       expect(res.body.title).toBe("Bug with screenshot");
       expect(res.body).toHaveProperty("image");
@@ -133,10 +132,10 @@ describe("Server API Tests", () => {
     it("should assign ticket to user as admin", async () => {
       // Get user id
       const userRes = await request(app)
-        .get("/api/admin/users")
+        .get("/api/admin/users/admins")
         .set("Authorization", `Bearer ${adminToken}`);
       const userId = userRes.body.find(
-        (u) => u.email === "user@example.com"
+        (u) => u.email === "admin@example.com"
       )._id;
 
       const res = await request(app)
