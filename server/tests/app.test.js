@@ -78,12 +78,12 @@ describe("Server API Tests", () => {
         .field("title", "Bug with screenshot")
         .field("description", "Dashboard not loading")
         .field("category", "bug")
-        .attach("image", path.resolve("server/uploads/tickets/loginbug.png"));
+        .attach("image", path.resolve("server/tests/login.png"));
       expect(res.statusCode).toBe(201);
       expect(res.body.title).toBe("Bug with screenshot");
       expect(res.body).toHaveProperty("image");
       ticketId = res.body._id;
-      expect(ticketId).toBeDefined(); 
+      expect(ticketId).toBeDefined();
     }, 30000);
 
     it("should add a comment as user", async () => {
