@@ -1,25 +1,4 @@
 services:
-  # MongoDB Database
-  # mongodb:
-  #   image: mongo:7
-  #   container_name: issue-tracker-mongodb
-  #   restart: unless-stopped
-  #   ports:
-  #     - "27017:27017"
-  #   environment:
-  #     MONGO_INITDB_ROOT_USERNAME: admin
-  #     MONGO_INITDB_ROOT_PASSWORD: password
-  #     MONGO_INITDB_DATABASE: issue_tracker
-  #   volumes:
-  #     - mongodb_data:/data/db
-  #   networks:
-  #     - issue-tracker-network
-  #   healthcheck:
-  #     test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 3
-
   # Backend Server
   server:
     build: ./server
@@ -27,6 +6,9 @@ services:
     restart: unless-stopped
     ports:
       - "5001:5001"
+    dns:                    
+      - 8.8.8.8            
+      - 8.8.4.4 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
       interval: 10s
@@ -37,10 +19,7 @@ services:
       - PORT=5001
       - MONGODB_URI=mongodb+srv://lina:buterflybuterfly@cluster0.nm0v4us.mongodb.net/issue_tracker?retryWrites=true&w=majority&appName=Cluster0
       - JWT_SECRET=${JWT_SECRET}
-    # depends_on:
-    #   - mongodb
-    # networks:
-    #   - issue-tracker-network
+
     volumes:
       - ./server:/app
       - /app/node_modules
@@ -59,6 +38,15 @@ services:
     volumes:
       - ./client:/app
       - /app/node_modules
+
+  ai-service:
+    image: gauravkarki7/issue-tracker-ai-service:latest
+    container_name: issue-tracker-ai-service
+    restart: unless-stopped
+    ports:
+      - "5002:5002"  
+    networks:
+      - issue-tracker-network
 
 volumes:
   mongodb_data:
