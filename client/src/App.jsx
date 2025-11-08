@@ -7,6 +7,7 @@ import { Layout } from './components/Layout';
 import DashboardPage from './pages/DashboardPage';
 import MyIssuesPage from './pages/MyIssuesPage';
 import ReportIssuePage from './pages/ReportIssuePage';
+import UserDashboard from './pages/UserDashboard';
 import HomePage from './pages/home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
@@ -23,7 +24,10 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           
-          {/* App pages with Layout */}
+          {/* User page - standalone without Layout */}
+          <Route path="/user" element={<UserDashboard />} />
+          
+          {/* Admin/Dashboard pages with Layout */}
           <Route element={<Layout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/my-issues" element={<MyIssuesPage />} />
