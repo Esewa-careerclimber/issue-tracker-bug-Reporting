@@ -61,7 +61,7 @@ const Signup = () => {
     if (formData.role === 'admin') {
       navigate('/dashboard')
     } else if (formData.role === 'user') {
-      navigate('/my-issues')
+      navigate('/user')
     } else {
       navigate('/report')
     }

@@ -18,7 +18,7 @@ export function Layout() {
             </Link>
           </div>
           <div className="navLinks">
-            <Link to="/" className={`navLink ${location.pathname === '/' ? 'active' : ''}`}>Dashboard</Link>
+            <Link to="/dashboard" className={`navLink ${location.pathname === '/dashboard' ? 'active' : ''}`}>Dashboard</Link>
             <Link to="/my-issues" className={`navLink ${location.pathname === '/my-issues' ? 'active' : ''}`}>My Issues</Link>
             <Link to="/report" className={`navLink ${location.pathname === '/report' ? 'active' : ''}`}>Report Issue</Link>
           </div>
