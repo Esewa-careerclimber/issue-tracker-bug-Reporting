@@ -1,19 +1,18 @@
 import React from 'react';
-import { allIssues } from '../pages/DashboardPage';
 import './IssueNav.css';
 
-export function IssueNav({ onCategorySelect }) {
-  // Calculate actual counts from allIssues data
-  const bugCount = allIssues.filter(issue => issue.type === 'Bug').length;
-  const featureCount = allIssues.filter(issue => issue.type === 'Feature').length;
-  const criticalCount = allIssues.filter(issue => issue.priority === 'Critical').length;
-  const openCount = allIssues.filter(issue => issue.status === 'Open').length;
+export function IssueNav({ onCategorySelect, issues = [] }) {
+  // Calculate actual counts from issues data
+  const bugCount = issues.filter(issue => issue.category === 'bug').length;
+  const featureCount = issues.filter(issue => issue.category === 'feature').length;
+  const criticalCount = issues.filter(issue => issue.severity === 'critical').length;
+  const openCount = issues.filter(issue => issue.status === 'open').length;
 
   const issueCategories = [
-    { label: 'Bug Reports', value: bugCount, color: 'red', type: 'Bug' },
-    { label: 'Feature Requests', value: featureCount, color: 'green', type: 'Feature' },
-    { label: 'Critical Issues', value: criticalCount, color: 'purple', priority: 'Critical' },
-    { label: 'Open Issues', value: openCount, color: 'blue', status: 'Open' },
+    { label: 'Bug Reports', value: bugCount, color: 'red', type: 'bug' },
+    { label: 'Feature Requests', value: featureCount, color: 'green', type: 'feature' },
+    { label: 'Critical Issues', value: criticalCount, color: 'purple', priority: 'critical' },
+    { label: 'Open Issues', value: openCount, color: 'blue', status: 'open' },
   ];
 
   return (

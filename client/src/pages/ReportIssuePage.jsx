@@ -1,44 +1,97 @@
 import React, { useState } from 'react';
+import { ticketsAPI } from '../services/api';
+import { useNavigate } from 'react-router-dom';
 import './ReportIssuePage.css';
 
 export default function ReportIssuePage() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: '',
-    type: 'bug',
-    priority: 'medium',
+    category: 'bug',
     description: '',
-    stepsToReproduce: '',
-    expectedBehavior: '',
-    actualBehavior: ''
+    image: null
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    setError('');
   };
 
-  const handleSubmit = (e) => {
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData(prev => ({ ...prev, image: file }));
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    // TODO: Send to backend
-    alert('Issue reported successfully!');
-    setFormData({
-      title: '',
-      type: 'bug',
-      priority: 'medium',
-      description: '',
-      stepsToReproduce: '',
-      expectedBehavior: '',
-      actualBehavior: ''
-    });
+    setLoading(true);
+    setError('');
+    
+    try {
+      await ticketsAPI.createTicket(formData);
+      setSuccess(true);
+      
+      // Reset form
+      setFormData({
+        title: '',
+        category: 'bug',
+        description: '',
+        image: null
+      });
+      
+      // Reset file input
+      const fileInput = document.getElementById('image');
+      if (fileInput) fileInput.value = '';
+      
+      setTimeout(() => {
+        setSuccess(false);
+        navigate('/my-issues');
+      }, 2000);
+    } catch (err) {
+      setError(err.message || 'Failed to create issue. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="report-issue-page">
       <div className="report-header">
         <h1>Report an Issue</h1>
-        <p>Help us improve by reporting bugs, requesting features, or providing feedback</p>
+        <p>Help us improve by reporting bugs, requesting features, or providing feedback. AI will analyze severity automatically.</p>
       </div>
+
+      {error && (
+        <div style={{
+          padding: '12px 20px',
+          marginBottom: '20px',
+          backgroundColor: '#fee',
+          color: '#c33',
+          borderRadius: '8px',
+          fontSize: '14px'
+        }}>
+          {error}
+        </div>
+      )}
+
+      {success && (
+        <div style={{
+          padding: '12px 20px',
+          marginBottom: '20px',
+          backgroundColor: '#efe',
+          color: '#3a3',
+          borderRadius: '8px',
+          fontSize: '14px'
+        }}>
+          Issue reported successfully! AI is analyzing the severity. Redirecting...
+        </div>
+      )}
 
       <form className="issue-form" onSubmit={handleSubmit}>
         <div className="form-row">
@@ -58,11 +111,11 @@ export default function ReportIssuePage() {
 
         <div className="form-row">
           <div className="form-group">
-            <label htmlFor="type">Issue Type *</label>
+            <label htmlFor="category">Issue Type *</label>
             <select
-              id="type"
-              name="type"
-              value={formData.type}
+              id="category"
+              name="category"
+              value={formData.category}
               onChange={handleChange}
               required
             >
@@ -74,19 +127,19 @@ export default function ReportIssuePage() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="priority">Priority *</label>
-            <select
-              id="priority"
-              name="priority"
-              value={formData.priority}
-              onChange={handleChange}
-              required
-            >
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-              <option value="critical">Critical</option>
-            </select>
+            <label htmlFor="image">Attachment (optional)</label>
+            <input
+              type="file"
+              id="image"
+              name="image"
+              accept="image/*"
+              onChange={handleFileChange}
+            />
+            {formData.image && (
+              <small style={{ display: 'block', marginTop: '4px', color: 'var(--color-text-muted)' }}>
+                Selected: {formData.image.name}
+              </small>
+            )}
           </div>
         </div>
 
@@ -98,63 +151,22 @@ export default function ReportIssuePage() {
               name="description"
               value={formData.description}
               onChange={handleChange}
-              placeholder="Provide a detailed description of the issue"
-              rows="4"
+              placeholder="Provide a detailed description of the issue. Our AI will automatically analyze the severity and create a summary."
+              rows="6"
               required
             />
+            <small style={{ display: 'block', marginTop: '4px', color: 'var(--color-text-muted)' }}>
+              💡 AI will automatically detect issue severity and generate a summary
+            </small>
           </div>
         </div>
-
-        {formData.type === 'bug' && (
-          <>
-            <div className="form-row">
-              <div className="form-group full-width">
-                <label htmlFor="stepsToReproduce">Steps to Reproduce</label>
-                <textarea
-                  id="stepsToReproduce"
-                  name="stepsToReproduce"
-                  value={formData.stepsToReproduce}
-                  onChange={handleChange}
-                  placeholder="1. Go to...&#10;2. Click on...&#10;3. See error"
-                  rows="4"
-                />
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="expectedBehavior">Expected Behavior</label>
-                <textarea
-                  id="expectedBehavior"
-                  name="expectedBehavior"
-                  value={formData.expectedBehavior}
-                  onChange={handleChange}
-                  placeholder="What should happen?"
-                  rows="3"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="actualBehavior">Actual Behavior</label>
-                <textarea
-                  id="actualBehavior"
-                  name="actualBehavior"
-                  value={formData.actualBehavior}
-                  onChange={handleChange}
-                  placeholder="What actually happens?"
-                  rows="3"
-                />
-              </div>
-            </div>
-          </>
-        )}
 
         <div className="form-actions">
           <button type="button" className="btn-secondary" onClick={() => window.history.back()}>
             Cancel
           </button>
-          <button type="submit" className="btn-primary">
-            Submit Issue
+          <button type="submit" className="btn-primary" disabled={loading}>
+            {loading ? 'Submitting & Analyzing...' : 'Submit Issue'}
           </button>
         </div>
       </form>

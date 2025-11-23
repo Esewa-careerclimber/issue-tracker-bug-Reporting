@@ -1,43 +1,48 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import './Login.css'
 
 const Login = () => {
   const navigate = useNavigate()
+  const { login } = useAuth()
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    role: 'admin',
-    companyCode: ''
   })
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     })
+    setError('')
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    setLoading(true)
+    setError('')
     
-    // Validate company code for admin and user
-    if ((formData.role === 'admin' || formData.role === 'user') && !formData.companyCode) {
-      alert('Company code is required for admin and team members!')
-      return
-    }
-    
-    // Simulate login - in real app, this would be an API call
-    console.log('Login attempt:', formData)
-    alert(`Logged in successfully as ${formData.role}!`)
-    
-    // Route based on role
-    if (formData.role === 'admin') {
-      navigate('/dashboard')
-    } else if (formData.role === 'user') {
-      navigate('/user')
-    } else {
-      navigate('/report')
+    try {
+      const result = await login(formData)
+      
+      if (result.success) {
+        // Route based on role
+        if (result.user.role === 'admin') {
+          navigate('/dashboard')
+        } else {
+          navigate('/user')
+        }
+      } else {
+        setError(result.error || 'Login failed. Please check your credentials.')
+      }
+    } catch (err) {
+      setError('An error occurred. Please try again.')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -50,37 +55,20 @@ const Login = () => {
             <p className="auth-subtitle">Sign in to your workspace</p>
           </div>
 
-          <form className="auth-form" onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label className="form-label">Login As</label>
-              <select
-                name="role"
-                className="form-select"
-                value={formData.role}
-                onChange={handleChange}
-              >
-                <option value="admin">Company Admin</option>
-                <option value="user">Team Member</option>
-                <option value="guest">Guest</option>
-              </select>
+          {error && (
+            <div style={{
+              padding: '12px',
+              marginBottom: '20px',
+              backgroundColor: '#fee',
+              color: '#c33',
+              borderRadius: '8px',
+              fontSize: '14px'
+            }}>
+              {error}
             </div>
+          )}
 
-            {(formData.role === 'admin' || formData.role === 'user') && (
-              <div className="form-group">
-                <label className="form-label">Company Code *</label>
-                <input
-                  type="text"
-                  name="companyCode"
-                  className="form-input"
-                  placeholder="COMP-12345"
-                  value={formData.companyCode}
-                  onChange={handleChange}
-                  required
-                />
-                <small className="form-hint">Enter your company's unique code</small>
-              </div>
-            )}
-
+          <form className="auth-form" onSubmit={handleSubmit}>
             <div className="form-group">
               <label className="form-label">Email Address</label>
               <input
@@ -115,11 +103,13 @@ const Login = () => {
               <a href="#" className="forgot-link">Forgot password?</a>
             </div>
 
-            <button type="submit" className="btn-submit">
-              Sign In
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+            <button type="submit" className="btn-submit" disabled={loading}>
+              {loading ? 'Signing in...' : 'Sign In'}
+              {!loading && (
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              )}
             </button>
           </form>
 

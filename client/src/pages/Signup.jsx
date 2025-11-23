@@ -1,69 +1,78 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import './Login.css'
 
 const Signup = () => {
   const navigate = useNavigate()
+  const { register } = useAuth()
   const [formData, setFormData] = useState({
-    // Common fields
-    name: '',
+    username: '',
     email: '',
     password: '',
     confirmPassword: '',
     role: 'admin',
-    
-    // Admin-specific fields
-    companyName: '',
-    registrationNumber: '',
-    companyEmail: '',
-    companyPhone: '',
-    
-    // User-specific fields
-    employeeId: '',
+    company: '',
     department: '',
-    workingCompany: '',
-    managerEmail: ''
   })
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     })
+    setError('')
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    setLoading(true)
+    setError('')
     
     if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match!')
+      setError('Passwords do not match!')
+      setLoading(false)
       return
     }
 
     // Validate required fields based on role
-    if (formData.role === 'admin') {
-      if (!formData.companyName || !formData.registrationNumber) {
-        alert('Please fill in all company details!')
-        return
-      }
-    } else if (formData.role === 'user') {
-      if (!formData.workingCompany || !formData.department) {
-        alert('Please fill in all employment details!')
-        return
-      }
+    if (formData.role === 'admin' && (!formData.company || !formData.department)) {
+      setError('Please fill in company and department details!')
+      setLoading(false)
+      return
     }
-    
-    // Simulate signup - in real app, this would be an API call
-    console.log('Signup attempt:', formData)
-    alert(`Account created successfully as ${formData.role}!`)
-    
-    // Route based on role
-    if (formData.role === 'admin') {
-      navigate('/dashboard')
-    } else if (formData.role === 'user') {
-      navigate('/user')
-    } else {
-      navigate('/report')
+
+    try {
+      const userData = {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+      }
+
+      // Add role-specific fields
+      if (formData.role === 'admin') {
+        userData.company = formData.company
+        userData.department = formData.department
+      }
+
+      const result = await register(userData, formData.role === 'admin')
+      
+      if (result.success) {
+        // Route based on role
+        if (result.user.role === 'admin') {
+          navigate('/dashboard')
+        } else {
+          navigate('/user')
+        }
+      } else {
+        setError(result.error || 'Registration failed. Please try again.')
+      }
+    } catch (err) {
+      setError('An error occurred. Please try again.')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -76,6 +85,19 @@ const Signup = () => {
             <p className="auth-subtitle">Get started with your workspace</p>
           </div>
 
+          {error && (
+            <div style={{
+              padding: '12px',
+              marginBottom: '20px',
+              backgroundColor: '#fee',
+              color: '#c33',
+              borderRadius: '8px',
+              fontSize: '14px'
+            }}>
+              {error}
+            </div>
+          )}
+
           <form className="auth-form" onSubmit={handleSubmit}>
             {/* Role Selection */}
             <div className="form-group">
@@ -86,9 +108,8 @@ const Signup = () => {
                 value={formData.role}
                 onChange={handleChange}
               >
-                <option value="admin">Company Admin (Register Company)</option>
-                <option value="user">Team Member (Employee)</option>
-                <option value="guest">Guest User</option>
+                <option value="admin">Company Admin</option>
+                <option value="user">Team Member</option>
               </select>
             </div>
 
@@ -96,13 +117,13 @@ const Signup = () => {
 
             {/* Common Fields */}
             <div className="form-group">
-              <label className="form-label">Full Name *</label>
+              <label className="form-label">Username *</label>
               <input
                 type="text"
-                name="name"
+                name="username"
                 className="form-input"
-                placeholder="John Doe"
-                value={formData.name}
+                placeholder="johndoe"
+                value={formData.username}
                 onChange={handleChange}
                 required
               />
@@ -130,81 +151,12 @@ const Signup = () => {
                   <label className="form-label">Company Name *</label>
                   <input
                     type="text"
-                    name="companyName"
+                    name="company"
                     className="form-input"
                     placeholder="Your Company Ltd."
-                    value={formData.companyName}
+                    value={formData.company}
                     onChange={handleChange}
                     required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Registration Number *</label>
-                  <input
-                    type="text"
-                    name="registrationNumber"
-                    className="form-input"
-                    placeholder="REG-123456"
-                    value={formData.registrationNumber}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Company Email</label>
-                  <input
-                    type="email"
-                    name="companyEmail"
-                    className="form-input"
-                    placeholder="contact@company.com"
-                    value={formData.companyEmail}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Company Phone</label>
-                  <input
-                    type="tel"
-                    name="companyPhone"
-                    className="form-input"
-                    placeholder="+1 234 567 8900"
-                    value={formData.companyPhone}
-                    onChange={handleChange}
-                  />
-                </div>
-              </>
-            )}
-
-            {/* User-specific fields */}
-            {formData.role === 'user' && (
-              <>
-                <div className="form-section-title">Employment Details</div>
-                
-                <div className="form-group">
-                  <label className="form-label">Company Name *</label>
-                  <input
-                    type="text"
-                    name="workingCompany"
-                    className="form-input"
-                    placeholder="Your Company Ltd."
-                    value={formData.workingCompany}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Employee ID</label>
-                  <input
-                    type="text"
-                    name="employeeId"
-                    className="form-input"
-                    placeholder="EMP-12345"
-                    value={formData.employeeId}
-                    onChange={handleChange}
                   />
                 </div>
 
@@ -214,36 +166,13 @@ const Signup = () => {
                     type="text"
                     name="department"
                     className="form-input"
-                    placeholder="Engineering, Marketing, etc."
+                    placeholder="Engineering, HR, etc."
                     value={formData.department}
                     onChange={handleChange}
                     required
                   />
                 </div>
-
-                <div className="form-group">
-                  <label className="form-label">Manager's Email</label>
-                  <input
-                    type="email"
-                    name="managerEmail"
-                    className="form-input"
-                    placeholder="manager@company.com"
-                    value={formData.managerEmail}
-                    onChange={handleChange}
-                  />
-                </div>
               </>
-            )}
-
-            {/* Guest info */}
-            {formData.role === 'guest' && (
-              <div className="info-box">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="2"/>
-                  <path d="M10 6V10M10 14H10.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
-                <span>As a guest, you can report issues and track them without company details.</span>
-              </div>
             )}
 
             <div className="form-divider"></div>
@@ -283,11 +212,13 @@ const Signup = () => {
               </label>
             </div>
 
-            <button type="submit" className="btn-submit">
-              Create Account
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+            <button type="submit" className="btn-submit" disabled={loading}>
+              {loading ? 'Creating Account...' : 'Create Account'}
+              {!loading && (
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              )}
             </button>
           </form>
 
