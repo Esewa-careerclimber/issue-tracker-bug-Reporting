@@ -1,10 +1,15 @@
 import request from "supertest";
+import dotenv from "dotenv";
 import app from "../server.js";
 import mongoose from "mongoose";
 import User from "../models/User.js";
 import Ticket from "../models/Ticket.js";
 import Comment from "../models/Comment.js";
 import path from "path";
+
+// Load environment variables before tests
+dotenv.config({ path: process.env.NODE_ENV === 'test' ? '.env.test' : '.env' });
+
 let userToken, adminToken, ticketId;
 
 beforeAll(async () => {
