@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { adminTicketsAPI } from '../services/api';
+import { ticketsAPI } from '../services/api';
 import './UserDashboard.css';
 
 const UserDashboard = () => {
@@ -21,12 +21,9 @@ const UserDashboard = () => {
   const fetchAssignedIssues = async () => {
     try {
       setLoading(true);
-      // Fetch all tickets and filter by assignedTo matching current user
-      const data = await adminTicketsAPI.getAllTickets();
-      const myAssignedIssues = data.filter(ticket => 
-        ticket.assignedTo?._id === user.id || ticket.assignedTo === user.id
-      );
-      setAssignedIssues(myAssignedIssues || []);
+      // Fetch user's own tickets
+      const data = await ticketsAPI.getUserTickets();
+      setAssignedIssues(data || []);
     } catch (err) {
       setError('Failed to load assigned tasks');
       console.error('Error fetching assigned tasks:', err);
