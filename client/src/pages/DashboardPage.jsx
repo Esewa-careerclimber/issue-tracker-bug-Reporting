@@ -1,93 +1,50 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { IssueNav } from '../components/IssueNav';
+import { adminTicketsAPI, dashboardAPI } from '../services/api';
 import './DashboardPage.css';
-
-// This will be shared data across pages
-export const allIssues = [
-  {
-    id: 1,
-    title: 'Login button not responding on mobile',
-    description: 'When users try to login on mobile devices, the login button becomes unresponsive after entering credentials. This affects iOS Safari and Chrome browsers.',
-    type: 'Bug',
-    priority: 'Critical',
-    status: 'Open',
-    author: 'John Doe',
-    email: 'john.doe@example.com',
-    time: '2 hours ago',
-    date: 'Nov 3, 2025 16:30',
-    stepsToReproduce: '1. Open app on mobile\n2. Enter credentials\n3. Tap login button\n4. Button becomes unresponsive',
-    expectedBehavior: 'User should be logged in successfully',
-    actualBehavior: 'Button does not respond to taps'
-  },
-  {
-    id: 2,
-    title: 'Add dark mode to settings page',
-    description: 'Users have requested a dark mode option in the settings page to reduce eye strain during night usage.',
-    type: 'Feature',
-    priority: 'Low',
-    status: 'Reviewed',
-    author: 'Jane Smith',
-    email: 'jane.smith@example.com',
-    time: '5 hours ago',
-    date: 'Nov 3, 2025 13:15'
-  },
-  {
-    id: 3,
-    title: 'Page crashes when submitting form',
-    description: 'The application crashes when submitting the contact form with all fields filled. This happens consistently on Chrome and Firefox.',
-    type: 'Bug',
-    priority: 'High',
-    status: 'In Progress',
-    author: 'Mike Johnson',
-    email: 'mike.j@example.com',
-    time: '1 day ago',
-    date: 'Nov 2, 2025 14:20',
-    stepsToReproduce: '1. Fill all form fields\n2. Click submit button\n3. Page crashes',
-    expectedBehavior: 'Form should submit successfully',
-    actualBehavior: 'Application crashes and refreshes'
-  },
-  {
-    id: 4,
-    title: 'Improve loading performance',
-    description: 'Dashboard takes too long to load initial data. Users are experiencing 5-10 second delays on first load.',
-    type: 'Feature',
-    priority: 'Medium',
-    status: 'Open',
-    author: 'Sarah Wilson',
-    email: 'sarah.w@example.com',
-    time: '2 days ago',
-    date: 'Nov 1, 2025 10:45'
-  },
-  {
-    id: 5,
-    title: 'Unable to reset password',
-    description: 'Password reset emails are not being delivered to users. Verified that emails are not in spam folders.',
-    type: 'Bug',
-    priority: 'High',
-    status: 'Open',
-    author: 'Tom Brown',
-    email: 'tom.brown@example.com',
-    time: '3 days ago',
-    date: 'Oct 31, 2025 09:30'
-  }
-];
 
 export default function DashboardPage() {
   const [searchText, setSearchText] = useState('');
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [filter, setFilter] = useState('all');
+  const [allIssues, setAllIssues] = useState([]);
+  const [dashboardStats, setDashboardStats] = useState({ open: 0, inProgress: 0, closed: 0 });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [ticketsData, statsData] = await Promise.all([
+        adminTicketsAPI.getAllTickets(),
+        dashboardAPI.getAdminDashboard()
+      ]);
+      
+      setAllIssues(ticketsData || []);
+      setDashboardStats(statsData || { open: 0, inProgress: 0, closed: 0 });
+    } catch (err) {
+      setError('Failed to load dashboard data');
+      console.error('Error fetching data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Calculate metrics from actual data
   const totalIssues = allIssues.length;
-  const openIssues = allIssues.filter(i => i.status === 'Open').length;
-  const inProgressIssues = allIssues.filter(i => i.status === 'In Progress').length;
-  const resolvedIssues = allIssues.filter(i => i.status === 'Reviewed' || i.status === 'Closed').length;
+  const openIssues = dashboardStats.open;
+  const inProgressIssues = dashboardStats.inProgress;
+  const resolvedIssues = dashboardStats.closed;
 
   const metrics = [
     { label: 'Total', value: totalIssues, color: '#3b82f6', filterKey: 'all' },
     { label: 'Open', value: openIssues, color: '#10b981', filterKey: 'open' },
     { label: 'In Progress', value: inProgressIssues, color: '#f59e0b', filterKey: 'in-progress' },
-    { label: 'Resolved', value: resolvedIssues, color: '#8b5cf6', filterKey: 'reviewed' },
+    { label: 'Resolved', value: resolvedIssues, color: '#8b5cf6', filterKey: 'closed' },
   ];
 
   const handleMetricClick = (filterKey) => {
@@ -95,8 +52,9 @@ export default function DashboardPage() {
   };
 
   const filteredIssues = allIssues.filter(issue => {
-    const matchesSearch = issue.title.toLowerCase().includes(searchText.toLowerCase()) ||
-                         issue.author.toLowerCase().includes(searchText.toLowerCase());
+    const matchesSearch = issue.title?.toLowerCase().includes(searchText.toLowerCase()) ||
+                         issue.createdBy?.username?.toLowerCase().includes(searchText.toLowerCase()) ||
+                         issue.description?.toLowerCase().includes(searchText.toLowerCase());
     const matchesFilter = filter === 'all' || issue.status.toLowerCase().replace(' ', '-') === filter;
     return matchesSearch && matchesFilter;
   });
@@ -121,12 +79,37 @@ export default function DashboardPage() {
     return colors[priority] || '#6b7280';
   };
 
-  const handleUpdateStatus = (newStatus) => {
-    // TODO: Update issue status in backend
-    console.log(`Updating issue ${selectedIssue.id} to status: ${newStatus}`);
-    alert(`Status updated to: ${newStatus}`);
-    setSelectedIssue(null);
+  const handleUpdateStatus = async (newStatus) => {
+    try {
+      await adminTicketsAPI.updateTicketStatus(selectedIssue._id, newStatus);
+      await fetchData(); // Refresh data
+      setSelectedIssue(null);
+    } catch (err) {
+      alert('Failed to update status: ' + err.message);
+    }
   };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 60) return `${diffMins} mins ago`;
+    if (diffHours < 24) return `${diffHours} hours ago`;
+    if (diffDays < 7) return `${diffDays} days ago`;
+    return date.toLocaleDateString();
+  };
+  
+  if (loading) {
+    return <div style={{ padding: '40px', textAlign: 'center' }}>Loading...</div>;
+  }
+
+  if (error) {
+    return <div style={{ padding: '40px', textAlign: 'center', color: 'red' }}>{error}</div>;
+  }
   
   return (
     <>
@@ -138,10 +121,13 @@ export default function DashboardPage() {
       </div>
 
       {/* Issue Category Navigation */}
-      <IssueNav onCategorySelect={(category) => {
-        console.log('Selected category:', category);
-        // Can be used to filter by type in the future
-      }} />
+      <IssueNav 
+        issues={allIssues}
+        onCategorySelect={(category) => {
+          console.log('Selected category:', category);
+          // Can be used to filter by type in the future
+        }} 
+      />
 
       <div className="metrics-grid-modern">
         {metrics.map((metric, index) => (
@@ -205,17 +191,17 @@ export default function DashboardPage() {
         <div className="issues-list">
           {filteredIssues.length > 0 ? (
             filteredIssues.map(issue => (
-              <div key={issue.id} className="issue-item">
+              <div key={issue._id} className="issue-item">
                 <div className="issue-content">
                   <div className="issue-header-row">
                     <h3 className="issue-title-text">{issue.title}</h3>
                     <div className="issue-badges">
-                      <span className="badge badge-type">{issue.type}</span>
+                      <span className="badge badge-type">{issue.category}</span>
                       <span 
                         className="badge badge-priority"
-                        style={{ backgroundColor: `${getPriorityColor(issue.priority)}15`, color: getPriorityColor(issue.priority) }}
+                        style={{ backgroundColor: `${getPriorityColor(issue.severity)}15`, color: getPriorityColor(issue.severity) }}
                       >
-                        {issue.priority}
+                        {issue.severity}
                       </span>
                       <span 
                         className="badge badge-status"
@@ -226,6 +212,18 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   <p className="issue-description">{issue.description.substring(0, 120)}...</p>
+                  {issue.summary && (
+                    <div style={{ 
+                      marginTop: '8px', 
+                      padding: '8px 12px', 
+                      background: 'var(--color-surface-alt)', 
+                      borderRadius: '6px',
+                      fontSize: '13px',
+                      color: 'var(--color-text-muted)'
+                    }}>
+                      <strong>AI Summary:</strong> {issue.summary}
+                    </div>
+                  )}
                   <div className="issue-footer">
                     <div className="issue-meta-info">
                       <span className="meta-item">
@@ -233,14 +231,14 @@ export default function DashboardPage() {
                           <circle cx="8" cy="5" r="2.5" stroke="currentColor" strokeWidth="1.5"/>
                           <path d="M3 13c0-2.761 2.239-5 5-5s5 2.239 5 5" stroke="currentColor" strokeWidth="1.5"/>
                         </svg>
-                        {issue.author}
+                        {issue.createdBy?.username || 'Unknown'}
                       </span>
                       <span className="meta-item">
                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                           <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.5"/>
                           <path d="M8 4v4l3 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                         </svg>
-                        {issue.time}
+                        {formatDate(issue.createdAt)}
                       </span>
                     </div>
                     <button 
@@ -271,7 +269,7 @@ export default function DashboardPage() {
             <div className="modal-header">
               <div>
                 <h2 className="modal-title">{selectedIssue.title}</h2>
-                <p className="modal-subtitle">Issue #{selectedIssue.id} • Reported by {selectedIssue.author}</p>
+                <p className="modal-subtitle">Issue #{selectedIssue._id?.slice(-6)} • Reported by {selectedIssue.createdBy?.username || 'Unknown'}</p>
               </div>
               <button className="modal-close" onClick={() => setSelectedIssue(null)}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -296,18 +294,18 @@ export default function DashboardPage() {
                     <label>Priority</label>
                     <span 
                       className="detail-badge"
-                      style={{ backgroundColor: `${getPriorityColor(selectedIssue.priority)}15`, color: getPriorityColor(selectedIssue.priority) }}
+                      style={{ backgroundColor: `${getPriorityColor(selectedIssue.severity)}15`, color: getPriorityColor(selectedIssue.severity) }}
                     >
-                      {selectedIssue.priority}
+                      {selectedIssue.severity}
                     </span>
                   </div>
                   <div className="detail-item">
                     <label>Type</label>
-                    <span className="detail-badge">{selectedIssue.type}</span>
+                    <span className="detail-badge">{selectedIssue.category}</span>
                   </div>
                   <div className="detail-item">
                     <label>Date</label>
-                    <span className="detail-text">{selectedIssue.date}</span>
+                    <span className="detail-text">{new Date(selectedIssue.createdAt).toLocaleDateString()}</span>
                   </div>
                 </div>
               </div>
@@ -315,38 +313,36 @@ export default function DashboardPage() {
               <div className="detail-section">
                 <h3 className="section-title">Reporter Information</h3>
                 <div className="reporter-info">
-                  <div className="reporter-avatar">{selectedIssue.author.charAt(0)}</div>
+                  <div className="reporter-avatar">{selectedIssue.createdBy?.username?.charAt(0).toUpperCase() || 'U'}</div>
                   <div>
-                    <div className="reporter-name">{selectedIssue.author}</div>
-                    <div className="reporter-email">{selectedIssue.email}</div>
+                    <div className="reporter-name">{selectedIssue.createdBy?.username || 'Unknown'}</div>
+                    <div className="reporter-email">{selectedIssue.createdBy?.email || 'N/A'}</div>
                   </div>
                 </div>
               </div>
+
+              {selectedIssue.summary && (
+                <div className="detail-section">
+                  <h3 className="section-title">AI Summary</h3>
+                  <p className="detail-description" style={{ fontStyle: 'italic', color: 'var(--color-text-muted)' }}>
+                    {selectedIssue.summary}
+                  </p>
+                </div>
+              )}
 
               <div className="detail-section">
                 <h3 className="section-title">Description</h3>
                 <p className="detail-description">{selectedIssue.description}</p>
               </div>
 
-              {selectedIssue.stepsToReproduce && (
+              {selectedIssue.image && (
                 <div className="detail-section">
-                  <h3 className="section-title">Steps to Reproduce</h3>
-                  <pre className="detail-steps">{selectedIssue.stepsToReproduce}</pre>
-                </div>
-              )}
-
-              {selectedIssue.expectedBehavior && (
-                <div className="detail-section">
-                  <div className="behavior-grid">
-                    <div>
-                      <h3 className="section-title">Expected Behavior</h3>
-                      <p className="detail-description">{selectedIssue.expectedBehavior}</p>
-                    </div>
-                    <div>
-                      <h3 className="section-title">Actual Behavior</h3>
-                      <p className="detail-description">{selectedIssue.actualBehavior}</p>
-                    </div>
-                  </div>
+                  <h3 className="section-title">Attachment</h3>
+                  <img 
+                    src={`http://localhost:5001/${selectedIssue.image}`} 
+                    alt="Issue attachment" 
+                    style={{ maxWidth: '100%', borderRadius: '8px' }}
+                  />
                 </div>
               )}
             </div>
@@ -356,23 +352,18 @@ export default function DashboardPage() {
                 Close
               </button>
               <div className="status-actions">
-                {selectedIssue.status !== 'Open' && (
-                  <button className="btn-status" onClick={() => handleUpdateStatus('Open')}>
+                {selectedIssue.status !== 'open' && (
+                  <button className="btn-status" onClick={() => handleUpdateStatus('open')}>
                     Mark as Open
                   </button>
                 )}
-                {selectedIssue.status !== 'In Progress' && (
-                  <button className="btn-status" onClick={() => handleUpdateStatus('In Progress')}>
+                {selectedIssue.status !== 'in-progress' && (
+                  <button className="btn-status" onClick={() => handleUpdateStatus('in-progress')}>
                     In Progress
                   </button>
                 )}
-                {selectedIssue.status !== 'Reviewed' && (
-                  <button className="btn-status" onClick={() => handleUpdateStatus('Reviewed')}>
-                    Mark Reviewed
-                  </button>
-                )}
-                {selectedIssue.status !== 'Closed' && (
-                  <button className="btn-primary" onClick={() => handleUpdateStatus('Closed')}>
+                {selectedIssue.status !== 'closed' && (
+                  <button className="btn-primary" onClick={() => handleUpdateStatus('closed')}>
                     Close Issue
                   </button>
                 )}
