@@ -1,72 +1,43 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { adminTicketsAPI } from '../services/api';
 import './UserDashboard.css';
-
-// Sample data - would come from backend based on logged-in user
-const assignedIssues = [
-  {
-    id: 1,
-    title: 'Login button not responding on mobile',
-    description: 'When users try to login on mobile devices, the login button becomes unresponsive after entering credentials.',
-    priority: 'Critical',
-    status: 'In Progress',
-    assignedBy: 'Admin',
-    assignedDate: 'Nov 3, 2025',
-    dueDate: 'Nov 10, 2025',
-    type: 'Bug',
-    estimatedTime: '4 hours',
-    tags: ['mobile', 'authentication', 'urgent']
-  },
-  {
-    id: 2,
-    title: 'Optimize database queries',
-    description: 'Several endpoints are experiencing slow response times due to inefficient database queries.',
-    priority: 'High',
-    status: 'Open',
-    assignedBy: 'Tech Lead',
-    assignedDate: 'Nov 2, 2025',
-    dueDate: 'Nov 15, 2025',
-    type: 'Performance',
-    estimatedTime: '8 hours',
-    tags: ['backend', 'database', 'optimization']
-  },
-  {
-    id: 3,
-    title: 'Update documentation for API v2',
-    description: 'Create comprehensive documentation for the new API version including all endpoints and examples.',
-    priority: 'Medium',
-    status: 'Open',
-    assignedBy: 'Product Manager',
-    assignedDate: 'Nov 1, 2025',
-    dueDate: 'Nov 20, 2025',
-    type: 'Documentation',
-    estimatedTime: '6 hours',
-    tags: ['documentation', 'api']
-  },
-  {
-    id: 4,
-    title: 'Implement dark mode',
-    description: 'Add dark mode support across all pages with theme toggle in settings.',
-    priority: 'Low',
-    status: 'In Review',
-    assignedBy: 'Design Lead',
-    assignedDate: 'Oct 28, 2025',
-    dueDate: 'Nov 5, 2025',
-    type: 'Feature',
-    estimatedTime: '10 hours',
-    tags: ['ui', 'theme', 'feature']
-  }
-];
 
 const UserDashboard = () => {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [filter, setFilter] = useState('all');
   const [searchText, setSearchText] = useState('');
-  const [statusUpdate, setStatusUpdate] = useState('');
+  const [assignedIssues, setAssignedIssues] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const handleLogout = () => {
+  useEffect(() => {
+    fetchAssignedIssues();
+  }, []);
+
+  const fetchAssignedIssues = async () => {
+    try {
+      setLoading(true);
+      // Fetch all tickets and filter by assignedTo matching current user
+      const data = await adminTicketsAPI.getAllTickets();
+      const myAssignedIssues = data.filter(ticket => 
+        ticket.assignedTo?._id === user.id || ticket.assignedTo === user.id
+      );
+      setAssignedIssues(myAssignedIssues || []);
+    } catch (err) {
+      setError('Failed to load assigned tasks');
+      console.error('Error fetching assigned tasks:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
     if (confirm('Are you sure you want to logout?')) {
+      await logout();
       navigate('/login');
     }
   };
@@ -74,46 +45,55 @@ const UserDashboard = () => {
   // Calculate statistics
   const stats = {
     total: assignedIssues.length,
-    open: assignedIssues.filter(i => i.status === 'Open').length,
-    inProgress: assignedIssues.filter(i => i.status === 'In Progress').length,
-    inReview: assignedIssues.filter(i => i.status === 'In Review').length,
-    completed: assignedIssues.filter(i => i.status === 'Completed').length
+    open: assignedIssues.filter(i => i.status === 'open').length,
+    inProgress: assignedIssues.filter(i => i.status === 'in-progress').length,
+    closed: assignedIssues.filter(i => i.status === 'closed').length
   };
 
   // Filter issues
   const filteredIssues = assignedIssues.filter(issue => {
-    const matchesSearch = issue.title.toLowerCase().includes(searchText.toLowerCase()) ||
-                         issue.description.toLowerCase().includes(searchText.toLowerCase());
-    const matchesFilter = filter === 'all' || issue.status.toLowerCase().replace(' ', '-') === filter;
+    const matchesSearch = issue.title?.toLowerCase().includes(searchText.toLowerCase()) ||
+                         issue.description?.toLowerCase().includes(searchText.toLowerCase());
+    const matchesFilter = filter === 'all' || issue.status === filter;
     return matchesSearch && matchesFilter;
   });
 
   const getPriorityColor = (priority) => {
     const colors = {
-      'Critical': '#ef4444',
-      'High': '#f97316',
-      'Medium': '#eab308',
-      'Low': '#10b981'
+      'critical': '#ef4444',
+      'high': '#f97316',
+      'medium': '#eab308',
+      'low': '#10b981'
     };
-    return colors[priority] || '#6b7280';
+    return colors[priority?.toLowerCase()] || '#6b7280';
   };
 
   const getStatusColor = (status) => {
     const colors = {
-      'Open': '#3b82f6',
-      'In Progress': '#f59e0b',
-      'In Review': '#8b5cf6',
-      'Completed': '#10b981'
+      'open': '#3b82f6',
+      'in-progress': '#f59e0b',
+      'closed': '#10b981'
     };
-    return colors[status] || '#6b7280';
+    return colors[status?.toLowerCase()] || '#6b7280';
   };
 
-  const handleStatusUpdate = (issueId, newStatus) => {
-    console.log(`Updating issue ${issueId} to ${newStatus}`);
-    // TODO: API call to update status
-    alert(`Status updated to: ${newStatus}`);
-    setSelectedIssue(null);
+  const handleStatusUpdate = async (issueId, newStatus) => {
+    try {
+      await adminTicketsAPI.updateTicketStatus(issueId, newStatus);
+      await fetchAssignedIssues(); // Refresh data
+      setSelectedIssue(null);
+    } catch (err) {
+      alert('Failed to update status: ' + err.message);
+    }
   };
+
+  if (loading) {
+    return <div style={{ padding: '40px', textAlign: 'center' }}>Loading your tasks...</div>;
+  }
+
+  if (error) {
+    return <div style={{ padding: '40px', textAlign: 'center', color: 'red' }}>{error}</div>;
+  }
 
   return (
     <div className="user-dashboard">
@@ -138,7 +118,7 @@ const UserDashboard = () => {
                   <path d="M4 20c0-4 4-6 8-6s8 2 8 6" stroke="currentColor" strokeWidth="2"/>
                 </svg>
               </div>
-              <span className="user-name">John Doe</span>
+              <span className="user-name">{user?.username || 'User'}</span>
             </button>
             <button className="logout-btn" onClick={handleLogout}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -172,9 +152,9 @@ const UserDashboard = () => {
           <div className="stat-value" style={{ color: '#f59e0b' }}>{stats.inProgress}</div>
           <div className="stat-label">In Progress</div>
         </div>
-        <div className="stat-card" onClick={() => setFilter('in-review')}>
-          <div className="stat-value" style={{ color: '#8b5cf6' }}>{stats.inReview}</div>
-          <div className="stat-label">In Review</div>
+        <div className="stat-card" onClick={() => setFilter('closed')}>
+          <div className="stat-value" style={{ color: '#10b981' }}>{stats.closed}</div>
+          <div className="stat-label">Closed</div>
         </div>
       </div>
 
@@ -206,10 +186,10 @@ const UserDashboard = () => {
                 In Progress
               </button>
               <button 
-                className={`filter-tab ${filter === 'in-review' ? 'active' : ''}`}
-                onClick={() => setFilter('in-review')}
+                className={`filter-tab ${filter === 'closed' ? 'active' : ''}`}
+                onClick={() => setFilter('closed')}
               >
-                In Review
+                Closed
               </button>
             </div>
             <input 
@@ -226,23 +206,23 @@ const UserDashboard = () => {
         <div className="tasks-list">
           {filteredIssues.length > 0 ? (
             filteredIssues.map(task => (
-              <div key={task.id} className="task-item" onClick={() => setSelectedIssue(task)}>
+              <div key={task._id} className="task-item" onClick={() => setSelectedIssue(task)}>
                 <div className="task-content">
                   <div className="task-header-row">
                     <div className="task-title-section">
                       <h3 className="task-title">{task.title}</h3>
-                      <span className="task-id">#{task.id}</span>
+                      <span className="task-id">#{task._id?.slice(-6)}</span>
                     </div>
                     <div className="task-badges">
-                      <span className="badge badge-type">{task.type}</span>
+                      <span className="badge badge-type">{task.category}</span>
                       <span 
                         className="badge badge-priority"
                         style={{ 
-                          backgroundColor: `${getPriorityColor(task.priority)}15`, 
-                          color: getPriorityColor(task.priority) 
+                          backgroundColor: `${getPriorityColor(task.severity)}15`, 
+                          color: getPriorityColor(task.severity) 
                         }}
                       >
-                        {task.priority}
+                        {task.severity}
                       </span>
                       <span 
                         className="badge badge-status"
@@ -255,7 +235,20 @@ const UserDashboard = () => {
                       </span>
                     </div>
                   </div>
-                  <p className="task-description">{task.description}</p>
+                  <p className="task-description">{task.description?.substring(0, 120)}...</p>
+                  {task.summary && (
+                    <div style={{ 
+                      marginTop: '8px', 
+                      padding: '6px 10px', 
+                      background: 'var(--color-surface-alt)', 
+                      borderRadius: '4px',
+                      fontSize: '12px',
+                      fontStyle: 'italic',
+                      color: 'var(--color-text-muted)'
+                    }}>
+                      AI: {task.summary}
+                    </div>
+                  )}
                   <div className="task-footer">
                     <div className="task-meta">
                       <span className="meta-item">
@@ -263,27 +256,15 @@ const UserDashboard = () => {
                           <circle cx="8" cy="6" r="3" stroke="currentColor" strokeWidth="1.5"/>
                           <path d="M2 14c0-2.5 2.5-4 6-4s6 1.5 6 4" stroke="currentColor" strokeWidth="1.5"/>
                         </svg>
-                        {task.assignedBy}
+                        {task.createdBy?.username || 'Unknown'}
                       </span>
                       <span className="meta-item">
                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                           <rect x="3" y="4" width="10" height="9" rx="1" stroke="currentColor" strokeWidth="1.5"/>
                           <path d="M3 7h10M5 2v3M11 2v3" stroke="currentColor" strokeWidth="1.5"/>
                         </svg>
-                        Due {task.dueDate}
+                        {new Date(task.createdAt).toLocaleDateString()}
                       </span>
-                      <span className="meta-item">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                          <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.5"/>
-                          <path d="M8 4v4l3 2" stroke="currentColor" strokeWidth="1.5"/>
-                        </svg>
-                        {task.estimatedTime}
-                      </span>
-                    </div>
-                    <div className="task-tags">
-                      {task.tags.map((tag, index) => (
-                        <span key={index} className="tag">{tag}</span>
-                      ))}
                     </div>
                   </div>
                 </div>
@@ -309,7 +290,7 @@ const UserDashboard = () => {
             <div className="modal-header">
               <div>
                 <h2 className="modal-title">{selectedIssue.title}</h2>
-                <p className="modal-subtitle">Task #{selectedIssue.id} • Assigned by {selectedIssue.assignedBy}</p>
+                <p className="modal-subtitle">Task #{selectedIssue._id?.slice(-6)} • Assigned by Admin</p>
               </div>
               <button className="modal-close" onClick={() => setSelectedIssue(null)}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -338,86 +319,79 @@ const UserDashboard = () => {
                     <span 
                       className="detail-badge"
                       style={{ 
-                        backgroundColor: `${getPriorityColor(selectedIssue.priority)}15`, 
-                        color: getPriorityColor(selectedIssue.priority) 
+                        backgroundColor: `${getPriorityColor(selectedIssue.severity)}15`, 
+                        color: getPriorityColor(selectedIssue.severity) 
                       }}
                     >
-                      {selectedIssue.priority}
+                      {selectedIssue.severity}
                     </span>
                   </div>
                   <div className="detail-item">
                     <label>Type</label>
-                    <span className="detail-badge">{selectedIssue.type}</span>
+                    <span className="detail-badge">{selectedIssue.category}</span>
                   </div>
                 </div>
                 <div className="detail-row">
                   <div className="detail-item">
                     <label>Assigned Date</label>
-                    <span className="detail-text">{selectedIssue.assignedDate}</span>
-                  </div>
-                  <div className="detail-item">
-                    <label>Due Date</label>
-                    <span className="detail-text">{selectedIssue.dueDate}</span>
-                  </div>
-                  <div className="detail-item">
-                    <label>Estimated Time</label>
-                    <span className="detail-text">{selectedIssue.estimatedTime}</span>
+                    <span className="detail-text">{new Date(selectedIssue.createdAt).toLocaleDateString()}</span>
                   </div>
                 </div>
               </div>
+
+              {selectedIssue.summary && (
+                <div className="detail-section">
+                  <h3 className="section-title">AI Summary</h3>
+                  <p className="detail-description" style={{ fontStyle: 'italic', color: 'var(--color-text-muted)' }}>
+                    {selectedIssue.summary}
+                  </p>
+                </div>
+              )}
 
               <div className="detail-section">
                 <h3 className="section-title">Description</h3>
                 <p className="detail-description">{selectedIssue.description}</p>
               </div>
 
-              <div className="detail-section">
-                <h3 className="section-title">Tags</h3>
-                <div className="tags-container">
-                  {selectedIssue.tags.map((tag, index) => (
-                    <span key={index} className="tag-large">{tag}</span>
-                  ))}
+              {selectedIssue.image && (
+                <div className="detail-section">
+                  <h3 className="section-title">Attachment</h3>
+                  <img 
+                    src={`http://localhost:5001/${selectedIssue.image}`} 
+                    alt="Issue attachment" 
+                    style={{ maxWidth: '100%', borderRadius: '8px' }}
+                  />
                 </div>
-              </div>
+              )}
 
               <div className="detail-section">
                 <h3 className="section-title">Update Status</h3>
                 <div className="status-actions">
-                  {selectedIssue.status !== 'In Progress' && (
+                  {selectedIssue.status !== 'in-progress' && (
                     <button 
                       className="status-btn btn-progress"
-                      onClick={() => handleStatusUpdate(selectedIssue.id, 'In Progress')}
+                      onClick={() => handleStatusUpdate(selectedIssue._id, 'in-progress')}
                     >
                       Start Working
                     </button>
                   )}
-                  {selectedIssue.status === 'In Progress' && (
+                  {selectedIssue.status === 'in-progress' && (
                     <button 
                       className="status-btn btn-review"
-                      onClick={() => handleStatusUpdate(selectedIssue.id, 'In Review')}
+                      onClick={() => handleStatusUpdate(selectedIssue._id, 'closed')}
                     >
-                      Submit for Review
+                      Mark as Completed
                     </button>
                   )}
-                  {selectedIssue.status !== 'Open' && (
+                  {selectedIssue.status !== 'open' && (
                     <button 
                       className="status-btn btn-reopen"
-                      onClick={() => handleStatusUpdate(selectedIssue.id, 'Open')}
+                      onClick={() => handleStatusUpdate(selectedIssue._id, 'open')}
                     >
                       Reopen Task
                     </button>
                   )}
                 </div>
-              </div>
-
-              <div className="detail-section">
-                <h3 className="section-title">Add Note</h3>
-                <textarea 
-                  className="note-input"
-                  placeholder="Add your progress notes, blockers, or questions here..."
-                  rows="4"
-                />
-                <button className="submit-btn">Submit Note</button>
               </div>
             </div>
           </div>
