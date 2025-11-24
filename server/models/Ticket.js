@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 const ticketSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
+  stepsToReproduce: { type: String },
   summary: { type: String },
   category: { type: String, enum: ['support', 'bug', 'feature', 'feedback'], required: true },
   severity: { type: String, enum: ['low', 'medium', 'high', 'critical'], default: 'low' },
