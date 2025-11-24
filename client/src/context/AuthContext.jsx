@@ -21,9 +21,16 @@ export const AuthProvider = ({ children }) => {
     const storedToken = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
     
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
+    if (storedToken && storedUser && storedUser !== 'undefined') {
+      try {
+        setToken(storedToken);
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        console.error('Failed to parse stored user:', error);
+        // Clear invalid data
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
     }
     setLoading(false);
   }, []);
@@ -32,13 +39,16 @@ export const AuthProvider = ({ children }) => {
     try {
       const data = await authAPI.login(credentials);
       
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      // Backend returns { _id, username, email, role, token }
+      const { token, ...userInfo } = data;
       
-      setToken(data.token);
-      setUser(data.user);
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(userInfo));
       
-      return { success: true, user: data.user };
+      setToken(token);
+      setUser(userInfo);
+      
+      return { success: true, user: userInfo };
     } catch (error) {
       return { success: false, error: error.message };
     }
@@ -50,13 +60,16 @@ export const AuthProvider = ({ children }) => {
         ? await authAPI.registerAdmin(userData)
         : await authAPI.registerUser(userData);
       
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      // Backend returns { _id, username, email, role, token, company?, department? }
+      const { token, ...userInfo } = data;
       
-      setToken(data.token);
-      setUser(data.user);
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(userInfo));
       
-      return { success: true, user: data.user };
+      setToken(token);
+      setUser(userInfo);
+      
+      return { success: true, user: userInfo };
     } catch (error) {
       return { success: false, error: error.message };
     }
