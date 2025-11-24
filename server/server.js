@@ -7,13 +7,13 @@ import userTicketRoutes from "./routes/user/tickets.js";
 import adminTicketRoutes from "./routes/admin/tickets.js";
 import userCommentRoutes from "./routes/user/comments.js";
 import adminCommentRoutes from "./routes/admin/comments.js";
-import errorHandler from "./middleware/errorHandler.js";
 import userNotificationRoutes from "./routes/user/notifications.js";
 import userDashboardRoutes from './routes/user/dashboard.js';
 import userProfileRoutes from './routes/user/profile.js';
 import adminDashboardRoutes from './routes/admin/dashboard.js';
 import adminAnalyticsRoutes from './routes/admin/analytics.js';
 import adminUserRoutes from './routes/admin/users.js';
+import errorHandler from "./middleware/errorHandler.js";
 
 dotenv.config();
 const app = express();
@@ -30,8 +30,6 @@ app.use("/api/admin/tickets", adminTicketRoutes);
 app.use("/api/user/comments", userCommentRoutes);
 app.use("/api/admin/comments", adminCommentRoutes);
 app.use("/api/user/notifications", userNotificationRoutes);
-
-app.use(errorHandler);
 app.use("/api/user/dashboard", userDashboardRoutes);
 app.use("/api/user/profile", userProfileRoutes);
 app.use("/api/admin/dashboard", adminDashboardRoutes);
@@ -41,7 +39,7 @@ app.use("/api/admin/users", adminUserRoutes);
 // Health Check Route
 app.get("/health", (req, res) => {
   const dbStatus =
-    mongoose.connection.readyState === 1 ? "connected" : "disconnected";
+  mongoose.connection.readyState === 1 ? "connected" : "disconnected";
   res.status(200).json({
     status: "ok",
     message: "Server is running",
@@ -53,6 +51,9 @@ app.get("/health", (req, res) => {
 app.get("/", (req, res) => {
   res.send("Issue Tracker Backend is running!");
 });
+
+// Error handler
+app.use(errorHandler);
 
 // Connect to MongoDB
 if (process.env.NODE_ENV !== "test") {
@@ -73,4 +74,3 @@ if (process.env.NODE_ENV !== "test") {
 }
 export default app;
 
-//! made some changes(changed port,import route, changed mongo_url to mongodb_url, added line in .catch)

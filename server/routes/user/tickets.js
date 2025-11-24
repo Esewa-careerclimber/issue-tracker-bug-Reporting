@@ -7,6 +7,7 @@ import { upload } from '../../middleware/upload.js';
 import {
   createTicket,
   getUserTickets,
+  getMyTickets,
   getSingleTicket
 } from '../../controllers/user/ticketController.js';
 
@@ -19,8 +20,6 @@ router.post(
   upload.single('image'),
   validate(['title', 'description', 'category']),
   async (req, res) => {
-    // req.body.summary = await summarize(req.body.description);
-    // req.body.severity = await identifySeverity(req.body.description);
     // Only call AI services in non-test environments
     if (process.env.NODE_ENV !== 'test') {
       req.body.summary = await summarize(req.body.description);
@@ -37,10 +36,13 @@ router.post(
   }
 );
 
-// Get all tickets for the logged-in user
+// Get all tickets (with filters) - ALL users' tickets
 router.get('/', authenticate, getUserTickets);
 
-// Get a single ticket (if owned by user)
+// Get only current user's tickets - for "My Issues" page
+router.get('/myissues', authenticate, getMyTickets);
+
+// Get a single ticket (any user can view)
 router.get('/:id', authenticate, getSingleTicket);
 
 // Debug route to inspect req.body for form-data requests
