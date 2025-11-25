@@ -422,6 +422,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-top: 12px;
 }
 
 .issue-meta-info {
@@ -429,6 +430,49 @@
   gap: 1.5rem;
   align-items: center;
 }
+
+.issue-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.btn-ghost {
+  padding: 0.5rem 1rem;
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-ghost:hover {
+  background: #d1fae5;
+  border-color: #6ee7b7;
+  color: #064e3b;
+}
+
+.btn-ghost.solid {
+  background: #10b981;
+  color: white;
+  border-color: #10b981;
+}
+
+.btn-ghost.solid:hover {
+  background: #059669;
+  border-color: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+}
+
+.btn-small {
+  padding: 0.35rem 0.8rem;
+  border-radius: 0.4rem;
+}
+
 
 .meta-item {
   display: flex;

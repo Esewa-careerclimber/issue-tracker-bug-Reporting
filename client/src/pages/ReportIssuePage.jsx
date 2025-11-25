@@ -120,11 +120,10 @@ export default function ReportIssuePage() {
               fontWeight: '600',
               fontSize: '18px'
             }}>
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="2"/>
-                <path d="M8 12L11 15L16 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" style={{ color: 'var(--color-primary)' }}>
+                <path d="M4 6h16M4 12h10M4 18h7" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
               </svg>
-              <span>IssueFlow</span>
+              <span>IssueTracker</span>
             </Link>
             <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
               <Link to="/user" style={{
@@ -245,7 +244,7 @@ export default function ReportIssuePage() {
         )}
 
         <div className="form-actions">
-          <button type="button" className="btn-secondary" onClick={() => window.history.back()}>
+          <button type="button" className="btn-primary" onClick={() => window.history.back()}>
             Cancel
           </button>
           <button type="submit" className="btn-primary" disabled={loading}>
