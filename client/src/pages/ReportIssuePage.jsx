@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
 import { ticketsAPI } from '../services/api';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { useToastContext } from '../context/ToastContext';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 import './ReportIssuePage.css';
 
 export default function ReportIssuePage() {
   const navigate = useNavigate();
+  const { user, isAdmin } = useAuth();
+  const { success, error: showError } = useToastContext();
   const [formData, setFormData] = useState({
     title: '',
     category: 'bug',
@@ -13,7 +18,6 @@ export default function ReportIssuePage() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -34,8 +38,8 @@ export default function ReportIssuePage() {
     setError('');
     
     try {
-      await ticketsAPI.createTicket(formData);
-      setSuccess(true);
+      const createdTicket = await ticketsAPI.createTicket(formData);
+      success('Issue created successfully! AI is analyzing severity...');
       
       // Reset form
       setFormData({
@@ -49,12 +53,18 @@ export default function ReportIssuePage() {
       const fileInput = document.getElementById('image');
       if (fileInput) fileInput.value = '';
       
+      // Navigate to the newly created issue details page
       setTimeout(() => {
-        setSuccess(false);
-        navigate('/my-issues');
-      }, 2000);
+        if (createdTicket && createdTicket._id) {
+          navigate(`/issue/${createdTicket._id}`);
+        } else {
+          navigate('/user');
+        }
+      }, 1500);
     } catch (err) {
-      setError(err.message || 'Failed to create issue. Please try again.');
+      const errorMsg = err.message || 'Failed to create issue. Please try again.';
+      setError(errorMsg);
+      showError(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -62,36 +72,61 @@ export default function ReportIssuePage() {
 
   return (
     <div className="report-issue-page">
+      {/* Navigation header for non-admin users */}
+      {!isAdmin && (
+        <nav className="report-issue-nav" style={{
+          background: 'var(--color-surface)',
+          borderBottom: '1px solid var(--color-border)',
+          padding: '12px 0',
+          marginBottom: '24px'
+        }}>
+          <div style={{
+            maxWidth: '1200px',
+            margin: '0 auto',
+            padding: '0 24px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <Link to="/user" style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              textDecoration: 'none',
+              color: 'var(--color-text)',
+              fontWeight: '600',
+              fontSize: '18px'
+            }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="2"/>
+                <path d="M8 12L11 15L16 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <span>IssueFlow</span>
+            </Link>
+            <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+              <Link to="/user" style={{
+                padding: '8px 16px',
+                textDecoration: 'none',
+                color: 'var(--color-text)',
+                borderRadius: '6px',
+                fontSize: '14px',
+                transition: 'background 0.2s'
+              }}
+              onMouseOver={(e) => e.target.style.background = 'var(--color-hover)'}
+              onMouseOut={(e) => e.target.style.background = 'transparent'}
+              >
+                My Dashboard
+              </Link>
+            </div>
+          </div>
+        </nav>
+      )}
+      
       <div className="report-header">
         <h1>Report an Issue</h1>
         <p>Help us improve by reporting bugs, requesting features, or providing feedback. AI will analyze severity automatically.</p>
       </div>
 
-      {error && (
-        <div style={{
-          padding: '12px 20px',
-          marginBottom: '20px',
-          backgroundColor: '#fee',
-          color: '#c33',
-          borderRadius: '8px',
-          fontSize: '14px'
-        }}>
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div style={{
-          padding: '12px 20px',
-          marginBottom: '20px',
-          backgroundColor: '#efe',
-          color: '#3a3',
-          borderRadius: '8px',
-          fontSize: '14px'
-        }}>
-          Issue reported successfully! AI is analyzing the severity. Redirecting...
-        </div>
-      )}
 
       <form className="issue-form" onSubmit={handleSubmit}>
         <div className="form-row">
@@ -166,7 +201,14 @@ export default function ReportIssuePage() {
             Cancel
           </button>
           <button type="submit" className="btn-primary" disabled={loading}>
-            {loading ? 'Submitting & Analyzing...' : 'Submit Issue'}
+            {loading ? (
+              <>
+                <LoadingSpinner size="small" inline={true} />
+                <span>Submitting & Analyzing...</span>
+              </>
+            ) : (
+              'Submit Issue'
+            )}
           </button>
         </div>
       </form>

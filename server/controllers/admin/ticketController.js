@@ -1,4 +1,5 @@
 import Ticket from "../../models/Ticket.js";
+import Comment from "../../models/Comment.js";
 import { sendNotification } from "../../services/notification.js";
 
 // Get all tickets (admin) with filtering and sorting
@@ -77,4 +78,26 @@ export const assignTicket = async (req, res) => {
     { new: true }
   ).populate("assignedTo", "username company");
   res.json(ticket);
+};
+
+// Delete ticket (admin)
+export const deleteTicket = async (req, res) => {
+  try {
+    const ticket = await Ticket.findById(req.params.id);
+    if (!ticket) {
+      return res.status(404).json({ message: "Ticket not found" });
+    }
+
+    await Comment.deleteMany({ ticket: ticket._id });
+    await Ticket.findByIdAndDelete(ticket._id);
+
+    await sendNotification(
+      ticket.createdBy,
+      `Your ticket "${ticket.title}" was removed by the admin team.`
+    );
+
+    res.json({ message: "Ticket deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };

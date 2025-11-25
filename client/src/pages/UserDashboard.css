@@ -126,6 +126,11 @@
 
 .dashboard-header {
   margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .page-title {
@@ -138,6 +143,106 @@
 .page-subtitle {
   font-size: 1rem;
   color: var(--color-text-muted);
+}
+
+.role-panels {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.role-panels div {
+  padding: 1rem;
+  border-radius: 14px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+}
+
+.role-panels h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+}
+
+.role-panels p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.quick-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.quick-actions button {
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  padding: 0.65rem 1.25rem;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.quick-actions button:hover:not(:disabled) {
+  background: var(--color-hover);
+}
+
+.quick-actions button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ai-summary-card {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) 1fr;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  border-radius: 18px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  background: linear-gradient(135deg, #ecfdf5, #ffffff);
+  margin-bottom: 2rem;
+}
+
+.ai-summary-label {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #047857;
+  margin: 0 0 0.35rem 0;
+}
+
+.ai-summary-card h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #064e3b;
+}
+
+.ai-severity-mix {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  border-left: 1px solid rgba(4, 78, 59, 0.25);
+  padding-left: 1rem;
+}
+
+.ai-severity-mix div {
+  text-align: center;
+}
+
+.ai-severity-mix span {
+  display: block;
+  font-size: 0.8rem;
+  color: #065f46;
+}
+
+.ai-severity-mix strong {
+  font-size: 1.4rem;
+  color: #064e3b;
 }
 
 /* Stats Grid */
@@ -671,6 +776,21 @@
 
   .user-content {
     padding: 1rem;
+  }
+
+  .ai-summary-card {
+    grid-template-columns: 1fr;
+  }
+
+  .ai-severity-mix {
+    border-left: none;
+    padding-left: 0;
+    justify-content: flex-start;
+    gap: 1rem;
+  }
+
+  .quick-actions {
+    width: 100%;
   }
 
   .stats-grid {

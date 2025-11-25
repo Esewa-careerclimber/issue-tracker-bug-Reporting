@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useToastContext } from '../context/ToastContext';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ticketsAPI, notificationsAPI } from '../services/api';
 import './UserDashboard.css';
 
 const UserDashboard = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { error: showError, success } = useToastContext();
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [filter, setFilter] = useState('all');
   const [searchText, setSearchText] = useState('');
@@ -29,12 +32,13 @@ const UserDashboard = () => {
   const fetchAssignedIssues = async () => {
     try {
       setLoading(true);
-      // Fetch user's own tickets
-      const data = await ticketsAPI.getUserTickets();
+      // Fetch user's own created tickets (not assigned, but created by user)
+      const data = await ticketsAPI.getMyTickets();
       setAssignedIssues(data || []);
     } catch (err) {
-      setError('Failed to load assigned tasks');
-      console.error('Error fetching assigned tasks:', err);
+      setError('Failed to load your issues');
+      console.error('Error fetching issues:', err);
+      showError('Unable to load your latest reports.');
     } finally {
       setLoading(false);
     }
@@ -48,6 +52,7 @@ const UserDashboard = () => {
     } catch (err) {
       console.error('Error fetching notifications:', err);
       setNotifications([]);
+      showError('Unable to load notifications.');
     } finally {
       setLoadingNotifications(false);
     }
@@ -81,6 +86,16 @@ const UserDashboard = () => {
     closed: assignedIssues.filter(i => i.status === 'closed').length
   };
 
+  const aiSummary =
+    assignedIssues.find((issue) => issue.summary)?.summary ||
+    'AI will summarize your next report automatically.';
+
+  const severityMix = {
+    critical: assignedIssues.filter((issue) => issue.severity === 'critical').length,
+    high: assignedIssues.filter((issue) => issue.severity === 'high').length,
+    medium: assignedIssues.filter((issue) => issue.severity === 'medium').length,
+  };
+
   // Filter issues
   const filteredIssues = assignedIssues.filter(issue => {
     const matchesSearch = issue.title?.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -111,11 +126,15 @@ const UserDashboard = () => {
   // Users cannot update status - only admins can
   // This function is kept for UI consistency but won't actually update
   const handleStatusUpdate = async (issueId, newStatus) => {
-    alert('Only admins can update issue status. Please contact your administrator.');
+    showError('Only admins can update issue status. Please contact your administrator.');
   };
 
   if (loading) {
-    return <div style={{ padding: '40px', textAlign: 'center' }}>Loading your tasks...</div>;
+    return (
+      <div className="user-dashboard" style={{ padding: '60px', textAlign: 'center' }}>
+        <LoadingSpinner size="large" text="Loading your workspace..." />
+      </div>
+    );
   }
 
   if (error) {
@@ -157,7 +176,10 @@ const UserDashboard = () => {
                   fontSize: '20px'
                 }}
               >
-                🔔
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 3a6 6 0 00-6 6v2.382c0 .734-.214 1.451-.614 2.064L4 15h16l-1.386-1.554A3.75 3.75 0 0118 11.382V9a6 6 0 00-6-6z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
                 {unreadCount > 0 && (
                   <span style={{
                     position: 'absolute',
@@ -290,7 +312,12 @@ const UserDashboard = () => {
                       textAlign: 'center',
                       color: 'var(--color-text-muted)'
                     }}>
-                      <div style={{ fontSize: '48px', marginBottom: '12px' }}>🔕</div>
+                      <div style={{ marginBottom: '12px' }}>
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" opacity="0.4"/>
+                          <path d="M9 9l6 6M15 9l-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                        </svg>
+                      </div>
                       <div>No notifications</div>
                     </div>
                   )}
@@ -319,8 +346,77 @@ const UserDashboard = () => {
       <div className="user-content">
         <div className="dashboard-header">
           <div>
-            <h1 className="page-title">My Assigned Tasks</h1>
-            <p className="page-subtitle">Tasks assigned to you by your team admin</p>
+            <h1 className="page-title">My Issues</h1>
+            <p className="page-subtitle">Issues you have created and reported</p>
+          </div>
+          <button 
+            className="create-issue-btn"
+            onClick={() => navigate('/report')}
+            style={{
+              padding: '12px 24px',
+              background: '#10b981',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: '500',
+              fontSize: '14px',
+              transition: 'background 0.2s'
+            }}
+            onMouseOver={(e) => e.target.style.background = '#059669'}
+            onMouseOut={(e) => e.target.style.background = '#10b981'}
+          >
+            + Create Issue
+          </button>
+        </div>
+
+        <div className="role-panels">
+          <div>
+            <h3>Developers & Admins</h3>
+            <p>Review updates pushed from the tester workspace and close the loop faster.</p>
+          </div>
+          <div>
+            <h3>Testers & End Users</h3>
+            <p>Capture bugs with evidence, category, and severity directly from the UI.</p>
+          </div>
+          <div>
+            <h3>AI Analyst</h3>
+            <p>Summaries and severity predictions are generated the moment you submit.</p>
+          </div>
+        </div>
+
+        <div className="quick-actions">
+          <button onClick={() => navigate('/report')}>Report a new issue</button>
+          <button onClick={fetchAssignedIssues}>Refresh data</button>
+          <button
+            onClick={() => {
+              if (!assignedIssues.length) return;
+              navigate(`/issue/${assignedIssues[0]._id}`);
+            }}
+            disabled={!assignedIssues.length}
+          >
+            Open latest issue
+          </button>
+        </div>
+
+        <div className="ai-summary-card">
+          <div>
+            <p className="ai-summary-label">AI summary briefing</p>
+            <h3>{aiSummary}</h3>
+          </div>
+          <div className="ai-severity-mix">
+            <div>
+              <span>Critical</span>
+              <strong>{severityMix.critical}</strong>
+            </div>
+            <div>
+              <span>High</span>
+              <strong>{severityMix.high}</strong>
+            </div>
+            <div>
+              <span>Medium</span>
+              <strong>{severityMix.medium}</strong>
+            </div>
           </div>
         </div>
 
@@ -348,8 +444,8 @@ const UserDashboard = () => {
       <div className="content-card">
         <div className="card-header">
           <div className="card-title-section">
-            <h2 className="card-title">Assigned Tasks</h2>
-            <span className="task-count">{filteredIssues.length} tasks</span>
+            <h2 className="card-title">My Issues</h2>
+            <span className="task-count">{filteredIssues.length} issues</span>
           </div>
           <div className="card-actions">
             <div className="filter-tabs">
@@ -392,7 +488,7 @@ const UserDashboard = () => {
         <div className="tasks-list">
           {filteredIssues.length > 0 ? (
             filteredIssues.map(task => (
-              <div key={task._id} className="task-item" onClick={() => setSelectedIssue(task)}>
+              <div key={task._id} className="task-item">
                 <div className="task-content">
                   <div className="task-header-row">
                     <div className="task-title-section">
@@ -452,6 +548,12 @@ const UserDashboard = () => {
                         {new Date(task.createdAt).toLocaleDateString()}
                       </span>
                     </div>
+                    <button 
+                      className="view-details-btn"
+                      onClick={() => navigate(`/issue/${task._id}`)}
+                    >
+                      View Details
+                    </button>
                   </div>
                 </div>
               </div>

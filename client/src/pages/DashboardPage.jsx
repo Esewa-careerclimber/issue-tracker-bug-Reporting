@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { IssueNav } from '../components/IssueNav';
 import { adminTicketsAPI, dashboardAPI, commentsAPI } from '../services/api';
+import { useToastContext } from '../context/ToastContext';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 import './DashboardPage.css';
 
 export default function DashboardPage() {
+  const navigate = useNavigate();
+  const { success, error: showError } = useToastContext();
   const [searchText, setSearchText] = useState('');
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [filter, setFilter] = useState('all');
@@ -17,6 +22,7 @@ export default function DashboardPage() {
   const [newComment, setNewComment] = useState('');
   const [loadingComments, setLoadingComments] = useState(false);
   const [submittingComment, setSubmittingComment] = useState(false);
+  const [deletingTicket, setDeletingTicket] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -35,8 +41,28 @@ export default function DashboardPage() {
     } catch (err) {
       setError('Failed to load dashboard data');
       console.error('Error fetching data:', err);
+      showError('Unable to load admin dashboard data.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteTicket = async () => {
+    if (!selectedIssue) return;
+    const confirmed = window.confirm(
+      `Delete "${selectedIssue.title}"? This action cannot be undone.`
+    );
+    if (!confirmed) return;
+    try {
+      setDeletingTicket(true);
+      await adminTicketsAPI.deleteTicket(selectedIssue._id);
+      success('Report deleted');
+      setSelectedIssue(null);
+      await fetchData();
+    } catch (err) {
+      showError(err.message || 'Failed to delete report');
+    } finally {
+      setDeletingTicket(false);
     }
   };
 
@@ -52,6 +78,16 @@ export default function DashboardPage() {
     { label: 'In Progress', value: inProgressIssues, color: '#f59e0b', filterKey: 'in-progress' },
     { label: 'Resolved', value: resolvedIssues, color: '#8b5cf6', filterKey: 'closed' },
   ];
+
+  const severityTally = {
+    critical: allIssues.filter((issue) => issue.severity === 'critical').length,
+    high: allIssues.filter((issue) => issue.severity === 'high').length,
+    medium: allIssues.filter((issue) => issue.severity === 'medium').length,
+  };
+
+  const highlightedSummary =
+    allIssues.find((issue) => issue.summary)?.summary ||
+    'AI is ready to summarize new reports as soon as they are created.';
 
   const handleMetricClick = (filterKey) => {
     setFilter(filterKey);
@@ -88,15 +124,19 @@ export default function DashboardPage() {
   };
 
   const handleUpdateStatus = async (newStatus) => {
+    if (!selectedIssue) return;
     try {
       await adminTicketsAPI.updateTicketStatus(selectedIssue._id, newStatus);
-      await fetchData(); // Refresh data
-      // Keep modal open to see updated status
-      const updatedIssue = await adminTicketsAPI.getAllTickets();
-      const updated = updatedIssue.find(t => t._id === selectedIssue._id);
-      if (updated) setSelectedIssue(updated);
+      await fetchData();
+      const updatedTickets = await adminTicketsAPI.getAllTickets();
+      const updated = updatedTickets.find(t => t._id === selectedIssue._id);
+      if (updated) {
+        setSelectedIssue(updated);
+        await fetchComments(updated._id);
+      }
+      success(`Status updated to ${newStatus}`);
     } catch (err) {
-      alert('Failed to update status: ' + err.message);
+      showError(err.message);
     }
   };
 
@@ -119,11 +159,12 @@ export default function DashboardPage() {
 
     try {
       setSubmittingComment(true);
-      const comment = await commentsAPI.addComment(selectedIssue._id, newComment);
-      setComments([...comments, comment]);
+      await commentsAPI.addComment(selectedIssue._id, newComment);
       setNewComment('');
+      // Refresh comments to get updated list with populated author
+      await fetchComments(selectedIssue._id);
     } catch (err) {
-      alert('Failed to add comment: ' + err.message);
+      showError('Failed to add comment: ' + err.message);
     } finally {
       setSubmittingComment(false);
     }
@@ -153,7 +194,11 @@ export default function DashboardPage() {
   };
   
   if (loading) {
-    return <div style={{ padding: '40px', textAlign: 'center' }}>Loading...</div>;
+    return (
+      <div style={{ padding: '60px', textAlign: 'center' }}>
+        <LoadingSpinner size="large" text="Loading admin workspace..." />
+      </div>
+    );
   }
 
   if (error) {
@@ -173,8 +218,7 @@ export default function DashboardPage() {
       <IssueNav 
         issues={allIssues}
         onCategorySelect={(category) => {
-          console.log('Selected category:', category);
-          // Can be used to filter by type in the future
+          setCategoryFilter(category || 'all');
         }} 
       />
 
@@ -192,6 +236,30 @@ export default function DashboardPage() {
             </div>
           </div>
         ))}
+      </div>
+
+      <div className="ai-snapshot">
+        <div>
+          <p className="snapshot-label">AI priority briefing</p>
+          <h3>{highlightedSummary}</h3>
+        </div>
+        <div className="snapshot-metrics">
+          <div>
+            <span>Critical</span>
+            <strong>{severityTally.critical}</strong>
+          </div>
+          <div>
+            <span>High</span>
+            <strong>{severityTally.high}</strong>
+          </div>
+          <div>
+            <span>Medium</span>
+            <strong>{severityTally.medium}</strong>
+          </div>
+        </div>
+        <button className="snapshot-cta" onClick={() => navigate('/report')}>
+          Add new report
+        </button>
       </div>
       
       <div className="content-card">
@@ -332,7 +400,14 @@ export default function DashboardPage() {
                       className="view-details-btn"
                       onClick={() => handleIssueSelect(issue)}
                     >
-                      View Details
+                      Quick View
+                    </button>
+                    <button 
+                      className="view-details-btn"
+                      onClick={() => navigate(`/issue/${issue._id}`)}
+                      style={{ marginLeft: '8px', background: '#10b981' }}
+                    >
+                      Open Full Page
                     </button>
                   </div>
                 </div>
@@ -516,6 +591,13 @@ export default function DashboardPage() {
                 Close
               </button>
               <div className="status-actions">
+                <button
+                  className="btn-status danger"
+                  onClick={handleDeleteTicket}
+                  disabled={deletingTicket}
+                >
+                  {deletingTicket ? 'Deleting...' : 'Delete Report'}
+                </button>
                 {selectedIssue.status !== 'open' && (
                   <button className="btn-status" onClick={() => handleUpdateStatus('open')}>
                     Mark as Open

@@ -148,6 +148,17 @@ export const adminTicketsAPI = {
     });
     return handleResponse(response);
   },
+
+  deleteTicket: async (id) => {
+    const token = getAuthToken();
+    const response = await fetch(`${API_BASE_URL}/admin/tickets/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    return handleResponse(response);
+  },
 };
 
 // Dashboard API
