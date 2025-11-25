@@ -40,21 +40,16 @@ export const authAPI = {
 
 // User Tickets API
 export const ticketsAPI = {
-  // THIS IS THE CORRECTED FUNCTION
   createTicket: (ticketData) => {
     const formData = new FormData();
-    // Append all text fields to the FormData object
     formData.append('title', ticketData.title);
     formData.append('description', ticketData.description);
     formData.append('type', ticketData.type);
     formData.append('category', ticketData.category);
 
-    // Only append the attachment if it exists
     if (ticketData.attachment) {
       formData.append('attachment', ticketData.attachment);
     }
-
-    // When sending FormData, axios automatically sets the 'Content-Type' to 'multipart/form-data'
     return api.post('/user/tickets', formData);
   },
   getUserTickets: () => api.get('/user/tickets'),
@@ -91,7 +86,7 @@ export default {
   auth: authAPI,
   tickets: ticketsAPI,
   adminTickets: adminTicketsAPI,
-  adminUsers: adminUsersAPI,
+  // FIX: Removed the undefined adminUsersAPI reference
   dashboard: dashboardAPI,
   profile: profileAPI,
   notifications: notificationsAPI,
