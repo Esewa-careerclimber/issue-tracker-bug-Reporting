@@ -63,6 +63,12 @@ export const adminTicketsAPI = {
   assignTicket: (id, userId) => api.patch(`/admin/tickets/${id}/assign`, { assignedTo: userId }),
 };
 
+// FIX: Added the missing commentsAPI object
+export const commentsAPI = {
+  createComment: (ticketId, commentData) => api.post(`/user/comments/${ticketId}`, commentData),
+  deleteComment: (commentId) => api.delete(`/admin/comments/${commentId}`),
+};
+
 // Dashboard API
 export const dashboardAPI = {
   getUserDashboard: () => api.get('/user/dashboard'),
@@ -86,7 +92,7 @@ export default {
   auth: authAPI,
   tickets: ticketsAPI,
   adminTickets: adminTicketsAPI,
-  // FIX: Removed the undefined adminUsersAPI reference
+  comments: commentsAPI, // FIX: Added commentsAPI to the default export
   dashboard: dashboardAPI,
   profile: profileAPI,
   notifications: notificationsAPI,
