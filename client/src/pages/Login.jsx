@@ -33,13 +33,21 @@ const Login = () => {
       const result = await login(formData)
       
       if (result.success) {
+        console.log('Login successful, user role:', result.user.role)
         success('Login successful!')
-        // Route based on role
+        // Route based on role from backend
         setTimeout(() => {
-          if (result.user.role === 'admin') {
+          const userRole = result.user.role
+          console.log('Navigating based on role:', userRole)
+          if (userRole === 'admin') {
+            console.log('Redirecting to /dashboard')
             navigate('/dashboard')
-          } else {
+          } else if (userRole === 'user') {
+            console.log('Redirecting to /user')
             navigate('/user')
+          } else {
+            console.error('Unknown role:', userRole)
+            navigate('/user') // Default fallback
           }
         }, 500)
       } else {

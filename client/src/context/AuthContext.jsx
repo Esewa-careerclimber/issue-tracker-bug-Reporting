@@ -39,8 +39,10 @@ export const AuthProvider = ({ children }) => {
     try {
       const data = await authAPI.login(credentials);
       
-      // Backend returns { _id, username, email, role, token }
+      // Backend returns { _id, username, email, role, token, company?, department? }
       const { token, ...userInfo } = data;
+      
+      console.log('AuthContext - Login response:', { token: token ? 'exists' : 'missing', userInfo });
       
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userInfo));
@@ -50,12 +52,14 @@ export const AuthProvider = ({ children }) => {
       
       return { success: true, user: userInfo };
     } catch (error) {
+      console.error('AuthContext - Login error:', error);
       return { success: false, error: error.message };
     }
   };
 
   const register = async (userData, isAdmin = false) => {
     try {
+      console.log('AuthContext - Registering as:', isAdmin ? 'admin' : 'user');
       const data = isAdmin 
         ? await authAPI.registerAdmin(userData)
         : await authAPI.registerUser(userData);
@@ -63,6 +67,8 @@ export const AuthProvider = ({ children }) => {
       // Backend returns { _id, username, email, role, token, company?, department? }
       const { token, ...userInfo } = data;
       
+      console.log('AuthContext - Registration response:', { token: token ? 'exists' : 'missing', userInfo });
+      
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userInfo));
       
@@ -71,6 +77,7 @@ export const AuthProvider = ({ children }) => {
       
       return { success: true, user: userInfo };
     } catch (error) {
+      console.error('AuthContext - Registration error:', error);
       return { success: false, error: error.message };
     }
   };

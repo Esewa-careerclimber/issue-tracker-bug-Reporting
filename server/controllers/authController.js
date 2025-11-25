@@ -53,13 +53,22 @@ export const login = async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '30d' });
-    res.json({
+    
+    const response = {
       _id: user._id,
       username: user.username,
       email: user.email,
       role: user.role,
       token
-    });
+    };
+
+    // Include admin-specific fields if user is admin
+    if (user.role === 'admin') {
+      response.company = user.company;
+      response.department = user.department;
+    }
+
+    res.json(response);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
