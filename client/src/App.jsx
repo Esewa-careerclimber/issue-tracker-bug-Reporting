@@ -4,12 +4,13 @@ import './App.css';
 import './theme/tokens.css';
 import { ThemeProvider } from './components/ThemeProvider';
 import { AuthProvider } from './context/AuthContext';
+import { ToastProvider } from './context/ToastContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Layout } from './components/Layout';
 import DashboardPage from './pages/DashboardPage';
-import MyIssuesPage from './pages/MyIssuesPage';
 import ReportIssuePage from './pages/ReportIssuePage';
 import UserDashboard from './pages/UserDashboard';
+import IssueDetailsPage from './pages/IssueDetailsPage';
 import HomePage from './pages/home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
@@ -18,7 +19,8 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <Router>
+        <ToastProvider>
+          <Router>
           <Routes>
             {/* Landing page as main page */}
             <Route path="/" element={<HomePage />} />
@@ -37,7 +39,7 @@ function App() {
               } 
             />
             
-            {/* Admin/Dashboard pages with Layout - protected, admin only */}
+            {/* Admin dashboard */}
             <Route 
               element={
                 <ProtectedRoute adminOnly={true}>
@@ -46,11 +48,30 @@ function App() {
               }
             >
               <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/my-issues" element={<MyIssuesPage />} />
-              <Route path="/report" element={<ReportIssuePage />} />
             </Route>
+            
+            {/* Report Issue - accessible to all authenticated users */}
+            <Route 
+              path="/report" 
+              element={
+                <ProtectedRoute>
+                  <ReportIssuePage />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Issue Details - accessible to all authenticated users */}
+            <Route 
+              path="/issue/:id" 
+              element={
+                <ProtectedRoute>
+                  <IssueDetailsPage />
+                </ProtectedRoute>
+              } 
+            />
           </Routes>
         </Router>
+        </ToastProvider>
       </AuthProvider>
     </ThemeProvider>
   );

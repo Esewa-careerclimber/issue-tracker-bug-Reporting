@@ -1,11 +1,14 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useToastContext } from '../context/ToastContext'
+import { LoadingSpinner } from '../components/LoadingSpinner'
 import './Login.css'
 
 const Signup = () => {
   const navigate = useNavigate()
   const { register } = useAuth()
+  const { success, error: showError } = useToastContext()
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -32,14 +35,18 @@ const Signup = () => {
     setError('')
     
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match!')
+      const errorMsg = 'Passwords do not match!'
+      setError(errorMsg)
+      showError(errorMsg)
       setLoading(false)
       return
     }
 
     // Validate required fields based on role
     if (formData.role === 'admin' && (!formData.company || !formData.department)) {
-      setError('Please fill in company and department details!')
+      const errorMsg = 'Please fill in company and department details!'
+      setError(errorMsg)
+      showError(errorMsg)
       setLoading(false)
       return
     }
@@ -60,17 +67,24 @@ const Signup = () => {
       const result = await register(userData, formData.role === 'admin')
       
       if (result.success) {
-        // Route based on role
-        if (result.user.role === 'admin') {
-          navigate('/dashboard')
-        } else {
-          navigate('/user')
-        }
+        success('Account created successfully!')
+        setTimeout(() => {
+          // Route based on role
+          if (result.user.role === 'admin') {
+            navigate('/dashboard')
+          } else {
+            navigate('/user')
+          }
+        }, 500)
       } else {
-        setError(result.error || 'Registration failed. Please try again.')
+        const errorMsg = result.error || 'Registration failed. Please try again.'
+        setError(errorMsg)
+        showError(errorMsg)
       }
     } catch (err) {
-      setError('An error occurred. Please try again.')
+      const errorMsg = 'An error occurred. Please try again.'
+      setError(errorMsg)
+      showError(errorMsg)
     } finally {
       setLoading(false)
     }
@@ -102,15 +116,22 @@ const Signup = () => {
             {/* Role Selection */}
             <div className="form-group">
               <label className="form-label">Join As</label>
-              <select
-                name="role"
-                className="form-select"
-                value={formData.role}
-                onChange={handleChange}
-              >
-                <option value="admin">Company Admin</option>
-                <option value="user">Team Member</option>
-              </select>
+              <div className="role-toggle">
+                <button
+                  type="button"
+                  className={formData.role === 'admin' ? 'active' : ''}
+                  onClick={() => setFormData({ ...formData, role: 'admin' })}
+                >
+                  Admin
+                </button>
+                <button
+                  type="button"
+                  className={formData.role === 'user' ? 'active' : ''}
+                  onClick={() => setFormData({ ...formData, role: 'user', company: '', department: '' })}
+                >
+                  User
+                </button>
+              </div>
             </div>
 
             <div className="form-divider"></div>
@@ -213,11 +234,18 @@ const Signup = () => {
             </div>
 
             <button type="submit" className="btn-submit" disabled={loading}>
-              {loading ? 'Creating Account...' : 'Create Account'}
-              {!loading && (
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+              {loading ? (
+                <>
+                  <LoadingSpinner size="small" inline={true} />
+                  <span>Creating Account...</span>
+                </>
+              ) : (
+                <>
+                  <span>Create Account</span>
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </>
               )}
             </button>
           </form>

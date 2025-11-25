@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { ticketsAPI, commentsAPI } from "../services/api";
 import "./MyIssues.css";
 
 const MyIssues = () => {
+  const navigate = useNavigate();
   const [category, setCategory] = useState("All");
   const [status, setStatus] = useState("All");
   const [severity, setSeverity] = useState("All");
@@ -124,9 +126,10 @@ const MyIssues = () => {
 
     try {
       setSubmittingComment(true);
-      const comment = await commentsAPI.addComment(selectedIssue._id, newComment);
-      setComments([...comments, comment]);
+      await commentsAPI.addComment(selectedIssue._id, newComment);
       setNewComment('');
+      // Refresh comments to get updated list with populated author
+      await fetchComments(selectedIssue._id);
     } catch (err) {
       alert('Failed to add comment: ' + err.message);
     } finally {
@@ -221,7 +224,14 @@ const MyIssues = () => {
                   className="view-details-btn"
                   onClick={() => handleIssueSelect(issue)}
                 >
-                  View Details
+                  Quick View
+                </button>
+                <button 
+                  className="view-details-btn"
+                  onClick={() => navigate(`/issue/${issue._id}`)}
+                  style={{ marginLeft: '8px', background: '#10b981' }}
+                >
+                  Open Full Page
                 </button>
               </div>
             </div>

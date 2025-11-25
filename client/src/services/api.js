@@ -148,6 +148,30 @@ export const adminTicketsAPI = {
     });
     return handleResponse(response);
   },
+
+  deleteTicket: async (id) => {
+    const token = getAuthToken();
+    const response = await fetch(`${API_BASE_URL}/admin/tickets/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    return handleResponse(response);
+  },
+};
+
+// Admin Users API
+export const adminUsersAPI = {
+  listUsers: async () => {
+    const token = getAuthToken();
+    const response = await fetch(`${API_BASE_URL}/admin/users`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    return handleResponse(response);
+  },
 };
 
 // Dashboard API
@@ -253,6 +277,7 @@ export default {
   auth: authAPI,
   tickets: ticketsAPI,
   adminTickets: adminTicketsAPI,
+  adminUsers: adminUsersAPI,
   dashboard: dashboardAPI,
   profile: profileAPI,
   notifications: notificationsAPI,

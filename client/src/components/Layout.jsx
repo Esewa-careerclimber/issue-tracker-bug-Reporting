@@ -14,6 +14,7 @@ export function Layout() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
+  const handleBrandRefresh = () => window.location.reload();
   
   const handleLogout = async () => {
     await logout();
@@ -60,10 +61,12 @@ export function Layout() {
       <nav className="topNav">
         <div className="leftNav">
           <div className="brandLogo">
-            <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
-              <span className="caterpillar">🐛</span>
+            <button type="button" className="brandButton" onClick={handleBrandRefresh}>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                <path d="M4 6h16M4 12h10M4 18h7" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
               <h1 className="brandName">IssueTracker</h1>
-            </Link>
+            </button>
           </div>
           <div className="navLinks">
             <Link to="/dashboard" className={`navLink ${location.pathname === '/dashboard' ? 'active' : ''}`}>Dashboard</Link>
@@ -77,7 +80,16 @@ export function Layout() {
             className="themeToggle"
             aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
           >
-            {theme === 'light' ? '🌙' : '☀️'}
+            {theme === 'light' ? (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            ) : (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="2"/>
+                <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" strokeWidth="2"/>
+              </svg>
+            )}
           </button>
           <div style={{ position: 'relative' }}>
             <button 
@@ -98,7 +110,10 @@ export function Layout() {
                 justifyContent: 'center'
               }}
             >
-              🔔
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M12 3a6 6 0 00-6 6v2.382c0 .734-.214 1.451-.614 2.064L4 15h16l-1.386-1.554A3.75 3.75 0 0118 11.382V9a6 6 0 00-6-6z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
               {unreadCount > 0 && (
                 <span style={{
                   position: 'absolute',
@@ -231,7 +246,12 @@ export function Layout() {
                     textAlign: 'center',
                     color: 'var(--color-text-muted)'
                   }}>
-                    <div style={{ fontSize: '48px', marginBottom: '12px' }}>🔕</div>
+                    <div style={{ marginBottom: '12px' }}>
+                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" opacity="0.4"/>
+                        <path d="M9 9l6 6M15 9l-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                      </svg>
+                    </div>
                     <div>No notifications</div>
                   </div>
                 )}
@@ -280,7 +300,14 @@ export function Layout() {
                   onMouseOver={(e) => e.target.style.background = 'var(--color-hover)'}
                   onMouseOut={(e) => e.target.style.background = 'transparent'}
                 >
-                  🚪 Logout
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                      <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                      <path d="M10 17l5-5-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M15 12H3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                    </svg>
+                    Logout
+                  </span>
                 </button>
               </div>
             )}
