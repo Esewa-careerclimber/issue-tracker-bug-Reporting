@@ -99,6 +99,16 @@ export const ticketsAPI = {
     });
     return handleResponse(response);
   },
+
+  getMyTickets: async () => {
+    const token = getAuthToken();
+    const response = await fetch(`${API_BASE_URL}/user/tickets/myissues`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    return handleResponse(response);
+  },
 };
 
 // Admin Tickets API
@@ -213,6 +223,32 @@ export const notificationsAPI = {
   },
 };
 
+// Comments API
+export const commentsAPI = {
+  getComments: async (ticketId) => {
+    const token = getAuthToken();
+    const response = await fetch(`${API_BASE_URL}/user/comments/${ticketId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    return handleResponse(response);
+  },
+
+  addComment: async (ticketId, text) => {
+    const token = getAuthToken();
+    const response = await fetch(`${API_BASE_URL}/user/comments/${ticketId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ text }),
+    });
+    return handleResponse(response);
+  },
+};
+
 export default {
   auth: authAPI,
   tickets: ticketsAPI,
@@ -220,4 +256,5 @@ export default {
   dashboard: dashboardAPI,
   profile: profileAPI,
   notifications: notificationsAPI,
+  comments: commentsAPI,
 };
