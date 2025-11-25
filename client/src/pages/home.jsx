@@ -19,6 +19,10 @@ const HomePage = () => {
             A single space where testers report, developers resolve, and our AI
             co-pilot summarizes every update in plain language.
           </p>
+          <section className="workspace-access">
+            <h2>Access Your Workspace</h2>
+            <p>Log in or create a new workspace to get started.</p>
+          </section>
           <div className="cta-group">
             <button
               className="btn-primary"
