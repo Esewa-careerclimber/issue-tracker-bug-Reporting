@@ -1,83 +1,44 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Home.css';
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const [showOptions, setShowOptions] = useState(false);
 
   return (
     <div className="home">
-      <header className="hero">
-        <div className="hero-content">
-          <p className="eyebrow">Issue Tracking & AI Insights</p>
-          <h1>
-            Ship reliable releases with a workflow that feels handcrafted for
-            modern product teams.
-          </h1>
-          <p className="subtitle">
-            A single space where testers report, developers resolve, and our AI
-            co-pilot summarizes every update in plain language.
-          </p>
-          <section className="workspace-access">
-            <h2>Access Your Workspace</h2>
-            <p>Log in or create a new workspace to get started.</p>
-          </section>
-          <div className="cta-group">
-            <button
-              className="btn-primary"
-              onClick={() => setShowOptions((prev) => !prev)}
-            >
-              Get started
-            </button>
-            {showOptions && (
-              <div className="cta-options">
-                <button onClick={() => navigate('/login')}>Log in</button>
-                <button
-                  className="secondary"
-                  onClick={() => navigate('/signup')}
-                >
-                  Create account
-                </button>
-              </div>
-            )}
-          </div>
-          <div className="hero-highlights">
-            <div>
-              <h4>Developers & Admins</h4>
-              <p>Review, prioritize, and close issues pulled directly from the live API.</p>
-            </div>
-            <div>
-              <h4>Testers & End Users</h4>
-              <p>Report bugs with attachments, severity, and category in seconds.</p>
-            </div>
-            <div>
-              <h4>AI Analyst</h4>
-              <p>Summarizes every report and predicts impact so teams know where to focus.</p>
-            </div>
-          </div>
+      <div className="bg-orbs">
+        <div className="orb orb-1"></div>
+        <div className="orb orb-2"></div>
+        <div className="orb orb-3"></div>
+      </div>
+      
+      <header className="header">
+        <div className="site-name">
+          Issue Tracker & Bug Reporting
         </div>
-        <div className="hero-panel">
-          <div className="panel-header">
-            <span>Live Signals</span>
-            <span className="pill">Powered by AI</span>
-          </div>
-          <div className="panel-metric">
-            <p>Critical issues flagged</p>
-            <h2>82%</h2>
-            <small>Automatically prioritized in the admin workspace.</small>
-          </div>
-          <div className="panel-metric">
-            <p>Average response time</p>
-            <h2>2.4h</h2>
-            <small>Notifications keep everyone in the loop instantly.</small>
-          </div>
-          <div className="panel-footer">
-            <span>Next step:</span>
-            <button onClick={() => navigate('/signup')}>Create workspace</button>
-          </div>
+        <div className="header-buttons">
+          <button onClick={() => navigate('/login')} className="header-btn btn-login">Login</button>
+          <button onClick={() => navigate('/signup')} className="header-btn btn-signup">Signup</button>
         </div>
       </header>
+
+      <main className="main-content">
+        <div className="center-text">
+          <div className="badge">Modern Issue Management</div>
+          <h1>
+            Track Issues.<br/>
+            <span className="transition-text">Ship Faster.</span>
+          </h1>
+          <p>Simple bug tracking for modern teams. Report, track, and resolve issues efficiently with intelligent automation.</p>
+        </div>
+      </main>
+
+      <footer className="footer">
+        <div className="powered-by">
+          Powered by <span className="ai-text">AI</span>
+        </div>
+      </footer>
     </div>
   );
 };
