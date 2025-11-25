@@ -36,7 +36,7 @@
   display: inline-block;
   margin-bottom: 1.5rem;
   padding: 0.75rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   border-radius: 12px;
 }
 
@@ -87,10 +87,10 @@
 .form-section-title {
   font-size: 0.95rem;
   font-weight: 700;
-  color: #667eea;
+  color: #10b981;
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid #667eea;
+  border-bottom: 2px solid #10b981;
 }
 
 .info-box {
@@ -98,8 +98,8 @@
   align-items: flex-start;
   gap: 0.75rem;
   padding: 1rem;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-  border: 1px solid rgba(102, 126, 234, 0.2);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 150, 105, 0.05) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.2);
   border-radius: 10px;
   font-size: 0.875rem;
   color: #475569;
@@ -109,7 +109,7 @@
 .info-box svg {
   flex-shrink: 0;
   margin-top: 0.125rem;
-  color: #667eea;
+  color: #10b981;
 }
 
 .form-input,
@@ -127,9 +127,9 @@
 .form-input:focus,
 .form-select:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #10b981;
   background: white;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.08);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.08);
 }
 
 .form-input::placeholder {
@@ -141,6 +141,30 @@
   justify-content: space-between;
   align-items: center;
   margin-top: 0.5rem;
+}
+
+.role-toggle {
+  display: inline-flex;
+  gap: 0.5rem;
+  background: #f0fdf4;
+  padding: 0.35rem;
+  border-radius: 999px;
+}
+
+.role-toggle button {
+  border: none;
+  background: transparent;
+  padding: 0.45rem 1.2rem;
+  border-radius: 999px;
+  font-weight: 600;
+  color: #065f46;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.role-toggle button.active {
+  background: white;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.18);
 }
 
 .checkbox-label {
@@ -156,25 +180,25 @@
   width: 18px;
   height: 18px;
   cursor: pointer;
-  accent-color: #667eea;
+  accent-color: #10b981;
 }
 
 .forgot-link {
   font-size: 0.875rem;
-  color: #667eea;
+  color: #10b981;
   text-decoration: none;
   font-weight: 600;
   transition: color 0.3s ease;
 }
 
 .forgot-link:hover {
-  color: #764ba2;
+  color: #059669;
 }
 
 .btn-submit {
   margin-top: 0.5rem;
   padding: 0.95rem 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
   border: none;
   border-radius: 10px;
@@ -186,12 +210,18 @@
   justify-content: center;
   gap: 0.5rem;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.25);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
 }
 
-.btn-submit:hover {
+.btn-submit:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.35);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+.btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .btn-submit svg {
@@ -215,14 +245,14 @@
 }
 
 .footer-link {
-  color: #667eea;
+  color: #10b981;
   text-decoration: none;
   font-weight: 600;
   transition: color 0.3s ease;
 }
 
 .footer-link:hover {
-  color: #764ba2;
+  color: #059669;
 }
 
 .auth-visual {
@@ -270,7 +300,7 @@
   gap: 0.5rem;
   padding: 0.65rem 1.25rem;
   background: white;
-  color: #667eea;
+  color: #10b981;
   text-decoration: none;
   border-radius: 10px;
   font-weight: 600;
@@ -324,9 +354,9 @@
 
 [data-theme="dark"] .form-input:focus,
 [data-theme="dark"] .form-select:focus {
-  border-color: #667eea;
+  border-color: #10b981;
   background: #1e293b;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
 }
 
 [data-theme="dark"] .auth-footer {

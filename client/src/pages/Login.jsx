@@ -1,11 +1,14 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useToastContext } from '../context/ToastContext'
+import { LoadingSpinner } from '../components/LoadingSpinner'
 import './Login.css'
 
 const Login = () => {
   const navigate = useNavigate()
   const { login } = useAuth()
+  const { success, error: showError } = useToastContext()
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -30,17 +33,24 @@ const Login = () => {
       const result = await login(formData)
       
       if (result.success) {
+        success('Login successful!')
         // Route based on role
-        if (result.user.role === 'admin') {
-          navigate('/dashboard')
-        } else {
-          navigate('/user')
-        }
+        setTimeout(() => {
+          if (result.user.role === 'admin') {
+            navigate('/dashboard')
+          } else {
+            navigate('/user')
+          }
+        }, 500)
       } else {
-        setError(result.error || 'Login failed. Please check your credentials.')
+        const errorMsg = result.error || 'Login failed. Please check your credentials.'
+        setError(errorMsg)
+        showError(errorMsg)
       }
     } catch (err) {
-      setError('An error occurred. Please try again.')
+      const errorMsg = 'An error occurred. Please try again.'
+      setError(errorMsg)
+      showError(errorMsg)
     } finally {
       setLoading(false)
     }
@@ -104,11 +114,18 @@ const Login = () => {
             </div>
 
             <button type="submit" className="btn-submit" disabled={loading}>
-              {loading ? 'Signing in...' : 'Sign In'}
-              {!loading && (
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+              {loading ? (
+                <>
+                  <LoadingSpinner size="small" inline={true} />
+                  <span>Signing in...</span>
+                </>
+              ) : (
+                <>
+                  <span>Sign In</span>
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </>
               )}
             </button>
           </form>

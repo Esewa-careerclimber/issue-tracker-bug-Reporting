@@ -1,16 +1,28 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { IssueNav } from '../components/IssueNav';
-import { adminTicketsAPI, dashboardAPI } from '../services/api';
+import { adminTicketsAPI, dashboardAPI, commentsAPI } from '../services/api';
+import { useToastContext } from '../context/ToastContext';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 import './DashboardPage.css';
 
 export default function DashboardPage() {
+  const navigate = useNavigate();
+  const { success, error: showError } = useToastContext();
   const [searchText, setSearchText] = useState('');
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [filter, setFilter] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [severityFilter, setSeverityFilter] = useState('all');
   const [allIssues, setAllIssues] = useState([]);
   const [dashboardStats, setDashboardStats] = useState({ open: 0, inProgress: 0, closed: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState('');
+  const [loadingComments, setLoadingComments] = useState(false);
+  const [submittingComment, setSubmittingComment] = useState(false);
+  const [deletingTicket, setDeletingTicket] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -29,8 +41,28 @@ export default function DashboardPage() {
     } catch (err) {
       setError('Failed to load dashboard data');
       console.error('Error fetching data:', err);
+      showError('Unable to load admin dashboard data.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteTicket = async () => {
+    if (!selectedIssue) return;
+    const confirmed = window.confirm(
+      `Delete "${selectedIssue.title}"? This action cannot be undone.`
+    );
+    if (!confirmed) return;
+    try {
+      setDeletingTicket(true);
+      await adminTicketsAPI.deleteTicket(selectedIssue._id);
+      success('Report deleted');
+      setSelectedIssue(null);
+      await fetchData();
+    } catch (err) {
+      showError(err.message || 'Failed to delete report');
+    } finally {
+      setDeletingTicket(false);
     }
   };
 
@@ -47,6 +79,16 @@ export default function DashboardPage() {
     { label: 'Resolved', value: resolvedIssues, color: '#8b5cf6', filterKey: 'closed' },
   ];
 
+  const severityTally = {
+    critical: allIssues.filter((issue) => issue.severity === 'critical').length,
+    high: allIssues.filter((issue) => issue.severity === 'high').length,
+    medium: allIssues.filter((issue) => issue.severity === 'medium').length,
+  };
+
+  const highlightedSummary =
+    allIssues.find((issue) => issue.summary)?.summary ||
+    'AI is ready to summarize new reports as soon as they are created.';
+
   const handleMetricClick = (filterKey) => {
     setFilter(filterKey);
   };
@@ -55,8 +97,10 @@ export default function DashboardPage() {
     const matchesSearch = issue.title?.toLowerCase().includes(searchText.toLowerCase()) ||
                          issue.createdBy?.username?.toLowerCase().includes(searchText.toLowerCase()) ||
                          issue.description?.toLowerCase().includes(searchText.toLowerCase());
-    const matchesFilter = filter === 'all' || issue.status.toLowerCase().replace(' ', '-') === filter;
-    return matchesSearch && matchesFilter;
+    const matchesStatus = filter === 'all' || issue.status.toLowerCase().replace(' ', '-') === filter;
+    const matchesCategory = categoryFilter === 'all' || issue.category?.toLowerCase() === categoryFilter.toLowerCase();
+    const matchesSeverity = severityFilter === 'all' || issue.severity?.toLowerCase() === severityFilter.toLowerCase();
+    return matchesSearch && matchesStatus && matchesCategory && matchesSeverity;
   });
 
   const getStatusColor = (status) => {
@@ -80,12 +124,58 @@ export default function DashboardPage() {
   };
 
   const handleUpdateStatus = async (newStatus) => {
+    if (!selectedIssue) return;
     try {
       await adminTicketsAPI.updateTicketStatus(selectedIssue._id, newStatus);
-      await fetchData(); // Refresh data
-      setSelectedIssue(null);
+      await fetchData();
+      const updatedTickets = await adminTicketsAPI.getAllTickets();
+      const updated = updatedTickets.find(t => t._id === selectedIssue._id);
+      if (updated) {
+        setSelectedIssue(updated);
+        await fetchComments(updated._id);
+      }
+      success(`Status updated to ${newStatus}`);
     } catch (err) {
-      alert('Failed to update status: ' + err.message);
+      showError(err.message);
+    }
+  };
+
+  const fetchComments = async (ticketId) => {
+    try {
+      setLoadingComments(true);
+      const data = await commentsAPI.getComments(ticketId);
+      setComments(data || []);
+    } catch (err) {
+      console.error('Error fetching comments:', err);
+      setComments([]);
+    } finally {
+      setLoadingComments(false);
+    }
+  };
+
+  const handleAddComment = async (e) => {
+    e.preventDefault();
+    if (!newComment.trim() || !selectedIssue) return;
+
+    try {
+      setSubmittingComment(true);
+      await commentsAPI.addComment(selectedIssue._id, newComment);
+      setNewComment('');
+      // Refresh comments to get updated list with populated author
+      await fetchComments(selectedIssue._id);
+    } catch (err) {
+      showError('Failed to add comment: ' + err.message);
+    } finally {
+      setSubmittingComment(false);
+    }
+  };
+
+  const handleIssueSelect = (issue) => {
+    setSelectedIssue(issue);
+    setComments([]);
+    setNewComment('');
+    if (issue) {
+      fetchComments(issue._id);
     }
   };
 
@@ -104,7 +194,11 @@ export default function DashboardPage() {
   };
   
   if (loading) {
-    return <div style={{ padding: '40px', textAlign: 'center' }}>Loading...</div>;
+    return (
+      <div style={{ padding: '60px', textAlign: 'center' }}>
+        <LoadingSpinner size="large" text="Loading admin workspace..." />
+      </div>
+    );
   }
 
   if (error) {
@@ -124,8 +218,7 @@ export default function DashboardPage() {
       <IssueNav 
         issues={allIssues}
         onCategorySelect={(category) => {
-          console.log('Selected category:', category);
-          // Can be used to filter by type in the future
+          setCategoryFilter(category || 'all');
         }} 
       />
 
@@ -143,6 +236,30 @@ export default function DashboardPage() {
             </div>
           </div>
         ))}
+      </div>
+
+      <div className="ai-snapshot">
+        <div>
+          <p className="snapshot-label">AI priority briefing</p>
+          <h3>{highlightedSummary}</h3>
+        </div>
+        <div className="snapshot-metrics">
+          <div>
+            <span>Critical</span>
+            <strong>{severityTally.critical}</strong>
+          </div>
+          <div>
+            <span>High</span>
+            <strong>{severityTally.high}</strong>
+          </div>
+          <div>
+            <span>Medium</span>
+            <strong>{severityTally.medium}</strong>
+          </div>
+        </div>
+        <button className="snapshot-cta" onClick={() => navigate('/report')}>
+          Add new report
+        </button>
       </div>
       
       <div className="content-card">
@@ -172,12 +289,50 @@ export default function DashboardPage() {
                 In Progress
               </button>
               <button 
-                className={`filter-tab ${filter === 'reviewed' ? 'active' : ''}`}
-                onClick={() => setFilter('reviewed')}
+                className={`filter-tab ${filter === 'closed' ? 'active' : ''}`}
+                onClick={() => setFilter('closed')}
               >
-                Reviewed
+                Closed
               </button>
             </div>
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              style={{
+                padding: '8px 12px',
+                borderRadius: '6px',
+                border: '1px solid var(--color-border)',
+                background: 'var(--color-surface)',
+                color: 'var(--color-text)',
+                fontSize: '14px',
+                cursor: 'pointer'
+              }}
+            >
+              <option value="all">All Categories</option>
+              <option value="bug">Bug</option>
+              <option value="feature">Feature</option>
+              <option value="support">Support</option>
+              <option value="feedback">Feedback</option>
+            </select>
+            <select
+              value={severityFilter}
+              onChange={(e) => setSeverityFilter(e.target.value)}
+              style={{
+                padding: '8px 12px',
+                borderRadius: '6px',
+                border: '1px solid var(--color-border)',
+                background: 'var(--color-surface)',
+                color: 'var(--color-text)',
+                fontSize: '14px',
+                cursor: 'pointer'
+              }}
+            >
+              <option value="all">All Severities</option>
+              <option value="critical">Critical</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
             <input 
               type="text"
               placeholder="Search issues..."
@@ -241,12 +396,20 @@ export default function DashboardPage() {
                         {formatDate(issue.createdAt)}
                       </span>
                     </div>
-                    <button 
-                      className="view-details-btn"
-                      onClick={() => setSelectedIssue(issue)}
-                    >
-                      View Details
-                    </button>
+                    <div className="issue-actions">
+                      <button 
+                        className="btn-ghost"
+                        onClick={() => handleIssueSelect(issue)}
+                      >
+                        Quick View
+                      </button>
+                      <button 
+                        className="btn-ghost solid"
+                        onClick={() => navigate(`/issue/${issue._id}`)}
+                      >
+                        Open Full Page
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -345,13 +508,97 @@ export default function DashboardPage() {
                   />
                 </div>
               )}
+
+              <div className="detail-section">
+                <h3 className="section-title">Comments ({comments.length})</h3>
+                {loadingComments ? (
+                  <div style={{ padding: '20px', textAlign: 'center' }}>Loading comments...</div>
+                ) : (
+                  <>
+                    <div style={{ maxHeight: '300px', overflowY: 'auto', marginBottom: '16px' }}>
+                      {comments.length > 0 ? (
+                        comments.map((comment) => (
+                          <div key={comment._id} style={{
+                            padding: '12px',
+                            marginBottom: '12px',
+                            background: 'var(--color-surface-alt)',
+                            borderRadius: '8px',
+                            border: '1px solid var(--color-border)'
+                          }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                              <div style={{ fontWeight: '600', fontSize: '14px' }}>
+                                {comment.author?.username || 'Unknown'}
+                              </div>
+                              <div style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
+                                {new Date(comment.createdAt).toLocaleString()}
+                              </div>
+                            </div>
+                            <div style={{ fontSize: '14px', color: 'var(--color-text)' }}>
+                              {comment.text}
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div style={{ padding: '20px', textAlign: 'center', color: 'var(--color-text-muted)' }}>
+                          No comments yet. Be the first to comment!
+                        </div>
+                      )}
+                    </div>
+                    <form onSubmit={handleAddComment} style={{ display: 'flex', gap: '8px' }}>
+                      <textarea
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        placeholder="Add a comment..."
+                        style={{
+                          flex: 1,
+                          padding: '10px',
+                          borderRadius: '6px',
+                          border: '1px solid var(--color-border)',
+                          fontSize: '14px',
+                          fontFamily: 'inherit',
+                          resize: 'vertical',
+                          minHeight: '60px'
+                        }}
+                        required
+                      />
+                      <button
+                        type="submit"
+                        disabled={submittingComment || !newComment.trim()}
+                        style={{
+                          padding: '10px 20px',
+                          background: submittingComment ? 'var(--color-text-muted)' : '#10b981',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          cursor: submittingComment ? 'not-allowed' : 'pointer',
+                          fontWeight: '500',
+                          alignSelf: 'flex-start'
+                        }}
+                      >
+                        {submittingComment ? 'Posting...' : 'Post'}
+                      </button>
+                    </form>
+                  </>
+                )}
+              </div>
             </div>
 
             <div className="modal-footer">
-              <button className="btn-secondary" onClick={() => setSelectedIssue(null)}>
+              <button className="btn-secondary" onClick={() => {
+                setSelectedIssue(null);
+                setComments([]);
+                setNewComment('');
+              }}>
                 Close
               </button>
               <div className="status-actions">
+                <button
+                  className="btn-status danger"
+                  onClick={handleDeleteTicket}
+                  disabled={deletingTicket}
+                >
+                  {deletingTicket ? 'Deleting...' : 'Delete Report'}
+                </button>
                 {selectedIssue.status !== 'open' && (
                   <button className="btn-status" onClick={() => handleUpdateStatus('open')}>
                     Mark as Open

@@ -13,7 +13,7 @@ const AppWithRouter = () => (
 describe('App', () => {
   it('renders the landing page heading', () => {
     render(<App />)
-    const heading = screen.getByText(/Got an Issue with Your Team/i)
+    const heading = screen.getByText(/Ship reliable releases with a workflow/i)
     expect(heading).toBeInTheDocument()
   })
 
