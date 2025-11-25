@@ -67,13 +67,21 @@ const Signup = () => {
       const result = await register(userData, formData.role === 'admin')
       
       if (result.success) {
+        console.log('Registration successful, user role:', result.user.role)
         success('Account created successfully!')
         setTimeout(() => {
-          // Route based on role
-          if (result.user.role === 'admin') {
+          // Route based on role from backend
+          const userRole = result.user.role
+          console.log('Navigating based on role:', userRole)
+          if (userRole === 'admin') {
+            console.log('Redirecting to /dashboard')
             navigate('/dashboard')
-          } else {
+          } else if (userRole === 'user') {
+            console.log('Redirecting to /user')
             navigate('/user')
+          } else {
+            console.error('Unknown role:', userRole)
+            navigate('/user') // Default fallback
           }
         }, 500)
       } else {
