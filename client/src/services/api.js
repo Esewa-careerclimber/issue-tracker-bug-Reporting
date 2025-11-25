@@ -91,6 +91,7 @@ export default {
   auth: authAPI,
   tickets: ticketsAPI,
   adminTickets: adminTicketsAPI,
+  adminUsers: adminUsersAPI,
   dashboard: dashboardAPI,
   profile: profileAPI,
   notifications: notificationsAPI,
