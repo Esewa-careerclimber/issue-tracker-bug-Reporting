@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ticketsAPI } from "../services/api";
+import { ticketsAPI, commentsAPI } from "../services/api";
 import "./MyIssues.css";
 
 const MyIssues = () => {
@@ -11,6 +11,10 @@ const MyIssues = () => {
   const [issues, setIssues] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState('');
+  const [loadingComments, setLoadingComments] = useState(false);
+  const [submittingComment, setSubmittingComment] = useState(false);
 
   useEffect(() => {
     fetchIssues();
@@ -19,7 +23,7 @@ const MyIssues = () => {
   const fetchIssues = async () => {
     try {
       setLoading(true);
-      const data = await ticketsAPI.getUserTickets();
+      const data = await ticketsAPI.getMyTickets();
       setIssues(data || []);
     } catch (err) {
       setError('Failed to load issues');
@@ -101,6 +105,44 @@ const MyIssues = () => {
     setSelectedIssue(null);
   };
 
+  const fetchComments = async (ticketId) => {
+    try {
+      setLoadingComments(true);
+      const data = await commentsAPI.getComments(ticketId);
+      setComments(data || []);
+    } catch (err) {
+      console.error('Error fetching comments:', err);
+      setComments([]);
+    } finally {
+      setLoadingComments(false);
+    }
+  };
+
+  const handleAddComment = async (e) => {
+    e.preventDefault();
+    if (!newComment.trim() || !selectedIssue) return;
+
+    try {
+      setSubmittingComment(true);
+      const comment = await commentsAPI.addComment(selectedIssue._id, newComment);
+      setComments([...comments, comment]);
+      setNewComment('');
+    } catch (err) {
+      alert('Failed to add comment: ' + err.message);
+    } finally {
+      setSubmittingComment(false);
+    }
+  };
+
+  const handleIssueSelect = (issue) => {
+    setSelectedIssue(issue);
+    setComments([]);
+    setNewComment('');
+    if (issue) {
+      fetchComments(issue._id);
+    }
+  };
+
   if (loading) {
     return <div style={{ padding: '40px', textAlign: 'center' }}>Loading your issues...</div>;
   }
@@ -177,7 +219,7 @@ const MyIssues = () => {
                 <small>Created {new Date(issue.createdAt).toLocaleDateString()}</small>
                 <button 
                   className="view-details-btn"
-                  onClick={() => setSelectedIssue(issue)}
+                  onClick={() => handleIssueSelect(issue)}
                 >
                   View Details
                 </button>
@@ -261,10 +303,87 @@ const MyIssues = () => {
                   />
                 </div>
               )}
+
+              <div className="detail-section">
+                <h3 className="section-title">Comments ({comments.length})</h3>
+                {loadingComments ? (
+                  <div style={{ padding: '20px', textAlign: 'center' }}>Loading comments...</div>
+                ) : (
+                  <>
+                    <div style={{ maxHeight: '300px', overflowY: 'auto', marginBottom: '16px' }}>
+                      {comments.length > 0 ? (
+                        comments.map((comment) => (
+                          <div key={comment._id} style={{
+                            padding: '12px',
+                            marginBottom: '12px',
+                            background: 'var(--color-surface-alt)',
+                            borderRadius: '8px',
+                            border: '1px solid var(--color-border)'
+                          }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                              <div style={{ fontWeight: '600', fontSize: '14px' }}>
+                                {comment.author?.username || 'Unknown'}
+                              </div>
+                              <div style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
+                                {new Date(comment.createdAt).toLocaleString()}
+                              </div>
+                            </div>
+                            <div style={{ fontSize: '14px', color: 'var(--color-text)' }}>
+                              {comment.text}
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div style={{ padding: '20px', textAlign: 'center', color: 'var(--color-text-muted)' }}>
+                          No comments yet. Be the first to comment!
+                        </div>
+                      )}
+                    </div>
+                    <form onSubmit={handleAddComment} style={{ display: 'flex', gap: '8px' }}>
+                      <textarea
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        placeholder="Add a comment..."
+                        style={{
+                          flex: 1,
+                          padding: '10px',
+                          borderRadius: '6px',
+                          border: '1px solid var(--color-border)',
+                          fontSize: '14px',
+                          fontFamily: 'inherit',
+                          resize: 'vertical',
+                          minHeight: '60px'
+                        }}
+                        required
+                      />
+                      <button
+                        type="submit"
+                        disabled={submittingComment || !newComment.trim()}
+                        style={{
+                          padding: '10px 20px',
+                          background: submittingComment ? 'var(--color-text-muted)' : '#10b981',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          cursor: submittingComment ? 'not-allowed' : 'pointer',
+                          fontWeight: '500',
+                          alignSelf: 'flex-start'
+                        }}
+                      >
+                        {submittingComment ? 'Posting...' : 'Post'}
+                      </button>
+                    </form>
+                  </>
+                )}
+              </div>
             </div>
 
             <div className="modal-footer">
-              <button className="btn-secondary" onClick={() => setSelectedIssue(null)}>
+              <button className="btn-secondary" onClick={() => {
+                setSelectedIssue(null);
+                setComments([]);
+                setNewComment('');
+              }}>
                 Close
               </button>
             </div>

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
 import { useTheme } from './ThemeProvider';
 import { useAuth } from '../context/AuthContext';
+import { notificationsAPI } from '../services/api';
 import './ImageMatchDashboard.css';
 
 export function Layout() {
@@ -10,11 +11,49 @@ export function Layout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [loadingNotifications, setLoadingNotifications] = useState(false);
   
   const handleLogout = async () => {
     await logout();
     navigate('/login');
   };
+
+  const fetchNotifications = async () => {
+    try {
+      setLoadingNotifications(true);
+      const data = await notificationsAPI.getNotifications();
+      setNotifications(data || []);
+    } catch (err) {
+      console.error('Error fetching notifications:', err);
+      setNotifications([]);
+    } finally {
+      setLoadingNotifications(false);
+    }
+  };
+
+  const handleMarkAsRead = async (notificationId) => {
+    try {
+      await notificationsAPI.markAsRead(notificationId);
+      setNotifications(notifications.map(n => 
+        n._id === notificationId ? { ...n, read: true } : n
+      ));
+    } catch (err) {
+      console.error('Error marking notification as read:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchNotifications();
+      // Refresh notifications every 30 seconds
+      const interval = setInterval(fetchNotifications, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
+
+  const unreadCount = notifications.filter(n => !n.read).length;
   
   return (
     <div className="dashboardContainer">
@@ -40,7 +79,165 @@ export function Layout() {
           >
             {theme === 'light' ? '🌙' : '☀️'}
           </button>
-          <a href="#" className="notificationIcon">🔔</a>
+          <div style={{ position: 'relative' }}>
+            <button 
+              onClick={() => {
+                setShowNotifications(!showNotifications);
+                if (!showNotifications) fetchNotifications();
+              }}
+              className="notificationIcon"
+              style={{
+                position: 'relative',
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '8px',
+                borderRadius: '6px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              🔔
+              {unreadCount > 0 && (
+                <span style={{
+                  position: 'absolute',
+                  top: '4px',
+                  right: '4px',
+                  background: '#ef4444',
+                  color: 'white',
+                  borderRadius: '50%',
+                  width: '18px',
+                  height: '18px',
+                  fontSize: '11px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 'bold'
+                }}>
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </button>
+            {showNotifications && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                right: 0,
+                marginTop: '8px',
+                background: 'var(--color-surface)',
+                border: '1px solid var(--color-border)',
+                borderRadius: '12px',
+                padding: '12px',
+                minWidth: '320px',
+                maxWidth: '400px',
+                maxHeight: '500px',
+                overflowY: 'auto',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                zIndex: 1000
+              }}>
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center',
+                  marginBottom: '12px',
+                  paddingBottom: '12px',
+                  borderBottom: '1px solid var(--color-border)'
+                }}>
+                  <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '600' }}>Notifications</h3>
+                  <button
+                    onClick={() => setShowNotifications(false)}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '18px',
+                      padding: '4px 8px'
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+                {loadingNotifications ? (
+                  <div style={{ padding: '20px', textAlign: 'center' }}>Loading...</div>
+                ) : notifications.length > 0 ? (
+                  <div>
+                    {notifications.map((notification) => (
+                      <div
+                        key={notification._id}
+                        onClick={() => {
+                          if (!notification.read) {
+                            handleMarkAsRead(notification._id);
+                          }
+                        }}
+                        style={{
+                          padding: '12px',
+                          marginBottom: '8px',
+                          background: notification.read ? 'transparent' : 'var(--color-surface-alt)',
+                          borderRadius: '8px',
+                          border: '1px solid var(--color-border)',
+                          cursor: 'pointer',
+                          transition: 'background 0.2s'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (notification.read) {
+                            e.currentTarget.style.background = 'var(--color-hover)';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (notification.read) {
+                            e.currentTarget.style.background = 'transparent';
+                          }
+                        }}
+                      >
+                        <div style={{ 
+                          display: 'flex', 
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start'
+                        }}>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ 
+                              fontSize: '14px', 
+                              fontWeight: notification.read ? '400' : '600',
+                              marginBottom: '4px',
+                              color: notification.read ? 'var(--color-text-muted)' : 'var(--color-text)'
+                            }}>
+                              {notification.message}
+                            </div>
+                            <div style={{ 
+                              fontSize: '12px', 
+                              color: 'var(--color-text-muted)'
+                            }}>
+                              {new Date(notification.createdAt).toLocaleString()}
+                            </div>
+                          </div>
+                          {!notification.read && (
+                            <div style={{
+                              width: '8px',
+                              height: '8px',
+                              borderRadius: '50%',
+                              background: '#3b82f6',
+                              marginLeft: '8px',
+                              flexShrink: 0
+                            }} />
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ 
+                    padding: '40px 20px', 
+                    textAlign: 'center',
+                    color: 'var(--color-text-muted)'
+                  }}>
+                    <div style={{ fontSize: '48px', marginBottom: '12px' }}>🔕</div>
+                    <div>No notifications</div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
           <div className="avatarContainer" style={{ position: 'relative' }}>
             <div 
               className="userAvatar" 
