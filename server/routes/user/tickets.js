@@ -1,8 +1,7 @@
 import express from 'express';
 import { createTicket, getUserTickets, getMyTickets, getSingleTicket } from '../../controllers/user/ticketController.js';
-// FIX: Changed 'protect' to 'authenticate' to match the actual export name
 import { authenticate } from '../../middleware/auth.js';
-import upload from '../../middleware/upload.js';
+import { upload } from '../../middleware/upload.js';
 
 const router = express.Router();
 
