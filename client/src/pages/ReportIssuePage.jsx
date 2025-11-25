@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ticketsAPI } from '../services/api';
+import React, { useState, useEffect } from 'react';
+import { ticketsAPI, adminUsersAPI } from '../services/api';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToastContext } from '../context/ToastContext';
@@ -14,11 +14,26 @@ export default function ReportIssuePage() {
     title: '',
     category: 'bug',
     description: '',
-    image: null
+    image: null,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [assignableUsers, setAssignableUsers] = useState([]);
+  const [selectedAssignee, setSelectedAssignee] = useState('');
 
+  useEffect(() => {
+    const fetchUsers = async () => {
+      if (!isAdmin) return;
+      try {
+        const users = await adminUsersAPI.listUsers();
+        setAssignableUsers(users || []);
+      } catch (err) {
+        console.error('Failed to load team members', err);
+        showError('Unable to load team members for assignment.');
+      }
+    };
+    fetchUsers();
+  }, [isAdmin, showError]);
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -38,7 +53,14 @@ export default function ReportIssuePage() {
     setError('');
     
     try {
-      const createdTicket = await ticketsAPI.createTicket(formData);
+      const payload = { ...formData };
+      if (isAdmin && selectedAssignee) {
+        payload.assignedTo = selectedAssignee;
+      } else if (!isAdmin && user?._id) {
+        payload.assignedTo = user._id;
+      }
+
+      const createdTicket = await ticketsAPI.createTicket(payload);
       success('Issue created successfully! AI is analyzing severity...');
       
       // Reset form
@@ -48,6 +70,7 @@ export default function ReportIssuePage() {
         description: '',
         image: null
       });
+      setSelectedAssignee('');
       
       // Reset file input
       const fileInput = document.getElementById('image');
@@ -60,7 +83,7 @@ export default function ReportIssuePage() {
         } else {
           navigate('/user');
         }
-      }, 1500);
+      }, 1200);
     } catch (err) {
       const errorMsg = err.message || 'Failed to create issue. Please try again.';
       setError(errorMsg);
@@ -127,6 +150,11 @@ export default function ReportIssuePage() {
         <p>Help us improve by reporting bugs, requesting features, or providing feedback. AI will analyze severity automatically.</p>
       </div>
 
+      {error && (
+        <div className="inline-error">
+          {error}
+        </div>
+      )}
 
       <form className="issue-form" onSubmit={handleSubmit}>
         <div className="form-row">
@@ -195,6 +223,26 @@ export default function ReportIssuePage() {
             </small>
           </div>
         </div>
+
+        {isAdmin && (
+          <div className="form-row">
+            <div className="form-group full-width">
+              <label htmlFor="assignee">Assign to team member</label>
+              <select
+                id="assignee"
+                value={selectedAssignee}
+                onChange={(e) => setSelectedAssignee(e.target.value)}
+              >
+                <option value="">Unassigned for now</option>
+                {assignableUsers.map((member) => (
+                  <option key={member._id} value={member._id}>
+                    {member.username} — {member.role}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
 
         <div className="form-actions">
           <button type="button" className="btn-secondary" onClick={() => window.history.back()}>

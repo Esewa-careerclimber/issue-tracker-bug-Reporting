@@ -396,19 +396,20 @@ export default function DashboardPage() {
                         {formatDate(issue.createdAt)}
                       </span>
                     </div>
-                    <button 
-                      className="view-details-btn"
-                      onClick={() => handleIssueSelect(issue)}
-                    >
-                      Quick View
-                    </button>
-                    <button 
-                      className="view-details-btn"
-                      onClick={() => navigate(`/issue/${issue._id}`)}
-                      style={{ marginLeft: '8px', background: '#10b981' }}
-                    >
-                      Open Full Page
-                    </button>
+                    <div className="issue-actions">
+                      <button 
+                        className="btn-ghost"
+                        onClick={() => handleIssueSelect(issue)}
+                      >
+                        Quick View
+                      </button>
+                      <button 
+                        className="btn-ghost solid"
+                        onClick={() => navigate(`/issue/${issue._id}`)}
+                      >
+                        Open Full Page
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

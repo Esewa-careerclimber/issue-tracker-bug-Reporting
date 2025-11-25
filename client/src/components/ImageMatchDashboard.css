@@ -43,9 +43,18 @@ body {
   margin-right: 4rem;
 }
 
-.caterpillar {
-  font-size: 1.75rem;
-  margin-right: 0.5rem;
+.brandButton {
+  border: none;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  cursor: pointer;
+  padding: 0.3rem 0.4rem;
+}
+
+.brandButton svg {
+  color: #2563eb;
 }
 
 .brandName {
