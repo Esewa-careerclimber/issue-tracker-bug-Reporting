@@ -149,10 +149,9 @@ const UserDashboard = () => {
           <div className="user-nav-left">
             <div className="user-brand">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="2"/>
-                <path d="M8 12L11 15L16 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M4 6h16M4 12h10M4 18h7" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
               </svg>
-              <span className="brand-text">IssueFlow</span>
+              <span className="brand-text">IssueTracker</span>
               <span className="user-badge">User Portal</span>
             </div>
           </div>
@@ -402,7 +401,15 @@ const UserDashboard = () => {
         <div className="ai-summary-card">
           <div>
             <p className="ai-summary-label">AI summary briefing</p>
-            <h3>{aiSummary}</h3>
+            <p style={{
+              margin: 0,
+              fontSize: '0.9375rem',
+              lineHeight: 1.6,
+              color: '#475569',
+              fontStyle: 'italic'
+            }}>
+              {aiSummary}
+            </p>
           </div>
           <div className="ai-severity-mix">
             <div>
@@ -422,19 +429,19 @@ const UserDashboard = () => {
 
       {/* Stats Overview */}
       <div className="stats-grid">
-        <div className="stat-card" onClick={() => setFilter('all')}>
+        <div className="stat-card stat-card-total" onClick={() => setFilter('all')}>
           <div className="stat-value">{stats.total}</div>
           <div className="stat-label">Total Tasks</div>
         </div>
-        <div className="stat-card" onClick={() => setFilter('open')}>
+        <div className="stat-card stat-card-open" onClick={() => setFilter('open')}>
           <div className="stat-value" style={{ color: '#3b82f6' }}>{stats.open}</div>
           <div className="stat-label">Open</div>
         </div>
-        <div className="stat-card" onClick={() => setFilter('in-progress')}>
+        <div className="stat-card stat-card-progress" onClick={() => setFilter('in-progress')}>
           <div className="stat-value" style={{ color: '#f59e0b' }}>{stats.inProgress}</div>
           <div className="stat-label">In Progress</div>
         </div>
-        <div className="stat-card" onClick={() => setFilter('closed')}>
+        <div className="stat-card stat-card-closed" onClick={() => setFilter('closed')}>
           <div className="stat-value" style={{ color: '#10b981' }}>{stats.closed}</div>
           <div className="stat-label">Closed</div>
         </div>
@@ -521,14 +528,15 @@ const UserDashboard = () => {
                   {task.summary && (
                     <div style={{ 
                       marginTop: '8px', 
-                      padding: '6px 10px', 
-                      background: 'var(--color-surface-alt)', 
-                      borderRadius: '4px',
-                      fontSize: '12px',
-                      fontStyle: 'italic',
-                      color: 'var(--color-text-muted)'
+                      padding: '12px 14px', 
+                      background: '#f0f9ff', 
+                      borderRadius: '6px',
+                      fontSize: '13px',
+                      color: '#475569',
+                      borderLeft: '3px solid #3b82f6',
+                      lineHeight: '1.6'
                     }}>
-                      AI: {task.summary}
+                      <strong style={{ color: '#1e40af' }}>AI:</strong> {task.summary}
                     </div>
                   )}
                   <div className="task-footer">
@@ -551,6 +559,7 @@ const UserDashboard = () => {
                     <button 
                       className="view-details-btn"
                       onClick={() => navigate(`/issue/${task._id}`)}
+                      style={{ marginTop: '8px' }}
                     >
                       View Details
                     </button>

@@ -218,8 +218,11 @@
 
 .ai-summary-card h3 {
   margin: 0;
-  font-size: 1.2rem;
-  color: #064e3b;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  font-style: italic;
+  font-weight: normal;
 }
 
 .ai-severity-mix {
@@ -260,6 +263,34 @@
   padding: 1.5rem;
   cursor: pointer;
   transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 4px;
+  transition: all 0.2s;
+}
+
+.stat-card-total::before {
+  background: #6366f1;
+}
+
+.stat-card-open::before {
+  background: #3b82f6;
+}
+
+.stat-card-progress::before {
+  background: #f59e0b;
+}
+
+.stat-card-closed::before {
+  background: #10b981;
 }
 
 .stat-card:hover {
@@ -591,7 +622,7 @@
 }
 
 .detail-section {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .detail-section:last-child {
@@ -599,10 +630,12 @@
 }
 
 .section-title {
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: 600;
-  color: var(--color-text);
-  margin-bottom: 1rem;
+  color: #0f172a;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 0.75rem 0;
 }
 
 .detail-row {
@@ -621,30 +654,31 @@
 .detail-item label {
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  color: #64748b;
 }
 
 .detail-badge {
   display: inline-block;
   padding: 0.375rem 0.75rem;
-  border-radius: 12px;
+  border-radius: 0.375rem;
   font-size: 0.875rem;
   font-weight: 600;
   width: fit-content;
-  border: 1px solid currentColor;
 }
 
 .detail-text {
   font-size: 0.875rem;
-  color: var(--color-text);
+  color: #0f172a;
+  font-weight: 500;
 }
 
 .detail-description {
-  color: var(--color-text-muted);
-  line-height: 1.6;
   font-size: 0.9375rem;
+  line-height: 1.6;
+  color: #475569;
+  margin: 0;
 }
 
 .tags-container {
