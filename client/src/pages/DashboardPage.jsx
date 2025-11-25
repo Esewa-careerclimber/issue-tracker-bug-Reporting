@@ -370,13 +370,15 @@ export default function DashboardPage() {
                   {issue.summary && (
                     <div style={{ 
                       marginTop: '8px', 
-                      padding: '8px 12px', 
-                      background: 'var(--color-surface-alt)', 
+                      padding: '12px 14px', 
+                      background: '#f0f9ff', 
                       borderRadius: '6px',
                       fontSize: '13px',
-                      color: 'var(--color-text-muted)'
+                      color: '#475569',
+                      borderLeft: '3px solid #3b82f6',
+                      lineHeight: '1.6'
                     }}>
-                      <strong>AI Summary:</strong> {issue.summary}
+                      <strong style={{ color: '#1e40af' }}>AI:</strong> {issue.summary}
                     </div>
                   )}
                   <div className="issue-footer">

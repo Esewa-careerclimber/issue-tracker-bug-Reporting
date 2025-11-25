@@ -8,6 +8,7 @@ import { ToastProvider } from './context/ToastContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Layout } from './components/Layout';
 import DashboardPage from './pages/DashboardPage';
+import MyIssuesPage from './pages/MyIssuesPage';
 import ReportIssuePage from './pages/ReportIssuePage';
 import UserDashboard from './pages/UserDashboard';
 import IssueDetailsPage from './pages/IssueDetailsPage';
@@ -39,17 +40,6 @@ function App() {
               } 
             />
             
-            {/* Admin dashboard */}
-            <Route 
-              element={
-                <ProtectedRoute adminOnly={true}>
-                  <Layout />
-                </ProtectedRoute>
-              }
-            >
-              <Route path="/dashboard" element={<DashboardPage />} />
-            </Route>
-            
             {/* Report Issue - accessible to all authenticated users */}
             <Route 
               path="/report" 
@@ -59,6 +49,18 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+            
+            {/* Admin dashboard */}
+            <Route 
+              element={
+                <ProtectedRoute adminOnly={true}>
+                  <Layout />
+                </ProtectedRoute>
+              }
+            >
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/my-issues" element={<MyIssuesPage />} />
+            </Route>
             
             {/* Issue Details - accessible to all authenticated users */}
             <Route 

@@ -198,41 +198,43 @@ const MyIssues = () => {
             <div className="issue-card" key={issue._id}>
               <h3>{issue.title}</h3>
               <div className="tags">
-                <span className={getBadgeClass(issue.category)}>{issue.category}</span>
+                <span className={getBadgeClass(issue.category)}>{issue.category?.toUpperCase()}</span>
                 <span className={`tag priority ${issue.severity?.toLowerCase()}`}>
-                  {issue.severity}
+                  {issue.severity?.toUpperCase()}
                 </span>
-                <span className={getStatusClass(issue.status)}>{issue.status}</span>
+                <span className={getStatusClass(issue.status)}>{issue.status?.toUpperCase()}</span>
               </div>
               <p>{issue.description?.substring(0, 150)}...</p>
               {issue.summary && (
                 <div style={{ 
                   marginTop: '8px', 
-                  padding: '6px 10px', 
-                  background: 'var(--color-surface-alt)', 
-                  borderRadius: '4px',
-                  fontSize: '12px',
-                  fontStyle: 'italic',
-                  color: 'var(--color-text-muted)'
+                  padding: '12px 14px', 
+                  background: '#f0f9ff', 
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  color: '#475569',
+                  borderLeft: '3px solid #3b82f6',
+                  lineHeight: '1.6'
                 }}>
-                  AI: {issue.summary}
+                  <strong style={{ color: '#1e40af' }}>AI:</strong> {issue.summary}
                 </div>
               )}
               <div className="issue-card-footer">
                 <small>Created {new Date(issue.createdAt).toLocaleDateString()}</small>
-                <button 
-                  className="view-details-btn"
-                  onClick={() => handleIssueSelect(issue)}
-                >
-                  Quick View
-                </button>
-                <button 
-                  className="view-details-btn"
-                  onClick={() => navigate(`/issue/${issue._id}`)}
-                  style={{ marginLeft: '8px', background: '#10b981' }}
-                >
-                  Open Full Page
-                </button>
+                <div className="button-group">
+                  <button 
+                    className="view-details-btn"
+                    onClick={() => handleIssueSelect(issue)}
+                  >
+                    Quick View
+                  </button>
+                  <button 
+                    className="view-details-btn primary"
+                    onClick={() => navigate(`/issue/${issue._id}`)}
+                  >
+                    Open Full Page
+                  </button>
+                </div>
               </div>
             </div>
           ))
@@ -266,7 +268,7 @@ const MyIssues = () => {
                       className="detail-badge"
                       style={{ backgroundColor: `${getStatusColor(selectedIssue.status)}15`, color: getStatusColor(selectedIssue.status) }}
                     >
-                      {selectedIssue.status}
+                      {selectedIssue.status?.toUpperCase()}
                     </span>
                   </div>
                   <div className="detail-item">
@@ -275,12 +277,12 @@ const MyIssues = () => {
                       className="detail-badge"
                       style={{ backgroundColor: `${getPriorityColor(selectedIssue.severity)}15`, color: getPriorityColor(selectedIssue.severity) }}
                     >
-                      {selectedIssue.severity}
+                      {selectedIssue.severity?.toUpperCase()}
                     </span>
                   </div>
                   <div className="detail-item">
                     <label>Type</label>
-                    <span className="detail-badge">{selectedIssue.category}</span>
+                    <span className="detail-badge">{selectedIssue.category?.toUpperCase()}</span>
                   </div>
                   <div className="detail-item">
                     <label>Date</label>

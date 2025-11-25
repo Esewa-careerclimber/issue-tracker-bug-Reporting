@@ -41,9 +41,58 @@ const ReportIssuePage = () => {
   };
 
   return (
-    <div className="report-issue-container">
-      <div className="report-issue-header">
-        <h1>Report Issue</h1>
+    <div className="report-issue-page">
+      {/* Navigation header for non-admin users */}
+      {!isAdmin && (
+        <nav className="report-issue-nav" style={{
+          background: 'var(--color-surface)',
+          borderBottom: '1px solid var(--color-border)',
+          padding: '12px 0',
+          marginBottom: '24px'
+        }}>
+          <div style={{
+            maxWidth: '1200px',
+            margin: '0 auto',
+            padding: '0 24px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <Link to="/user" style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              textDecoration: 'none',
+              color: 'var(--color-text)',
+              fontWeight: '600',
+              fontSize: '18px'
+            }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" style={{ color: 'var(--color-primary)' }}>
+                <path d="M4 6h16M4 12h10M4 18h7" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              <span>IssueTracker</span>
+            </Link>
+            <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+              <Link to="/user" style={{
+                padding: '8px 16px',
+                textDecoration: 'none',
+                color: 'var(--color-text)',
+                borderRadius: '6px',
+                fontSize: '14px',
+                transition: 'background 0.2s'
+              }}
+              onMouseOver={(e) => e.target.style.background = 'var(--color-hover)'}
+              onMouseOut={(e) => e.target.style.background = 'transparent'}
+              >
+                My Dashboard
+              </Link>
+            </div>
+          </div>
+        </nav>
+      )}
+      
+      <div className="report-header">
+        <h1>Report an Issue</h1>
         <p>Help us improve by reporting bugs, requesting features, or providing feedback. AI will analyze severity automatically.</p>
       </div>
 
@@ -93,15 +142,40 @@ const ReportIssuePage = () => {
           />
         </div>
 
-        <div className="form-group">
-          <label htmlFor="description">Description *</label>
-          <textarea
-            id="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            required
-            rows="8"
-          ></textarea>
+        {isAdmin && (
+          <div className="form-row">
+            <div className="form-group full-width">
+              <label htmlFor="assignee">Assign to team member</label>
+              <select
+                id="assignee"
+                value={selectedAssignee}
+                onChange={(e) => setSelectedAssignee(e.target.value)}
+              >
+                <option value="">Unassigned for now</option>
+                {assignableUsers.map((member) => (
+                  <option key={member._id} value={member._id}>
+                    {member.username} — {member.role}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
+
+        <div className="form-actions">
+          <button type="button" className="btn-primary" onClick={() => window.history.back()}>
+            Cancel
+          </button>
+          <button type="submit" className="btn-primary" disabled={loading}>
+            {loading ? (
+              <>
+                <LoadingSpinner size="small" inline={true} />
+                <span>Submitting & Analyzing...</span>
+              </>
+            ) : (
+              'Submit Issue'
+            )}
+          </button>
         </div>
 
         <button type="submit" className="submit-btn">Submit Issue</button>
