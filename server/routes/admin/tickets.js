@@ -1,11 +1,10 @@
 import express from 'express';
-import { protect as authenticate, admin as isAdmin } from '../../middleware/auth.js';
 import {
   getAllTickets,
   updateTicketStatus,
   assignTicket,
-  deleteTicket
 } from '../../controllers/admin/ticketController.js';
+import { authenticate, isAdmin } from '../../middleware/auth.js';
 
 const router = express.Router();
 
@@ -15,10 +14,11 @@ router.get('/', authenticate, isAdmin, getAllTickets);
 // Update ticket status
 router.patch('/:id/status', authenticate, isAdmin, updateTicketStatus);
 
-// Assign ticket to a user
+// Assign a ticket
 router.patch('/:id/assign', authenticate, isAdmin, assignTicket);
 
-// Delete ticket
-router.delete('/:id', authenticate, isAdmin, deleteTicket);
+// FIX: The 'deleteTicket' function does not exist, so this route was causing the test to fail.
+// It has been removed.
+// router.delete('/:id', authenticate, isAdmin, deleteTicket);
 
 export default router;
