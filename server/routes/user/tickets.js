@@ -1,26 +1,20 @@
 import express from 'express';
-import {
-  createTicket,
-  getUserTickets,
-  getMyTickets,
-  getSingleTicket,
-} from '../../controllers/user/ticketController.js';
-import { protect } from '../../middleware/auth.js';
-import { upload } from '../../middleware/upload.js';
+import { createTicket, getUserTickets, getMyTickets, getSingleTicket } from '../../controllers/user/ticketController.js';
+// FIX: Changed 'protect' to 'authenticate' to match the actual export name
+import { authenticate } from '../../middleware/auth.js';
+import upload from '../../middleware/upload.js';
 
 const router = express.Router();
 
 // Route to get all tickets and create a new ticket
-// The 'createTicket' controller function now handles all logic, including AI calls.
-router
-  .route('/')
-  .get(protect, getUserTickets)
-  .post(protect, upload.single('attachment'), createTicket);
+router.route('/')
+  .get(authenticate, getUserTickets)
+  .post(authenticate, upload.single('attachment'), createTicket);
 
-// Route for the logged-in user's specific tickets
-router.route('/my-issues').get(protect, getMyTickets);
+// Route to get tickets created by the logged-in user
+router.get('/my-tickets', authenticate, getMyTickets);
 
-// Route to get a single ticket by its ID
-router.route('/:id').get(protect, getSingleTicket);
+// Route to get a single ticket by ID
+router.get('/:id', authenticate, getSingleTicket);
 
 export default router;
