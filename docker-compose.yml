@@ -16,10 +16,13 @@ services:
       retries: 3
     environment:
       - NODE_ENV=development
+      - DOCKER_ENV=true
       - PORT=5001
       - MONGODB_URI=mongodb+srv://lina:buterflybuterfly@cluster0.nm0v4us.mongodb.net/issue_tracker?retryWrites=true&w=majority&appName=Cluster0
       - JWT_SECRET=${JWT_SECRET}
-
+      - AI_SERVICE_URL=http://ai-service:5002
+    networks:
+      - issue-tracker-network
     volumes:
       - ./server:/app
       - /app/node_modules
