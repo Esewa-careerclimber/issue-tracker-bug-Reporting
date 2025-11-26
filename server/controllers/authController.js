@@ -1,5 +1,7 @@
 import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
+import logger from '../utils/logger.js';
+
 
 export const registerUser = async (req, res) => {
   try {
@@ -18,6 +20,7 @@ export const registerUser = async (req, res) => {
       token
     });
   } catch (error) {
+    logger.error(`User registration failed: ${error.message}`);
     res.status(400).json({ message: error.message });
   }
 };
@@ -41,6 +44,7 @@ export const registerAdmin = async (req, res) => {
       token
     });
   } catch (error) {
+    logger.error(`Admin registration failed: ${error.message}`);
     res.status(400).json({ message: error.message });
   }
 };
@@ -70,6 +74,7 @@ export const login = async (req, res) => {
 
     res.json(response);
   } catch (error) {
+    logger.error(`Login failed: ${error.message}`);
     res.status(400).json({ message: error.message });
   }
 };

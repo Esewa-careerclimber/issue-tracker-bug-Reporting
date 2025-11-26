@@ -1,8 +1,13 @@
 import express from 'express';
 import { getProfile, updateProfile } from '../../controllers/user/profileController.js';
-import { protect } from '../../middleware/auth.js';
+// FIX: Changed 'protect' to 'authenticate' to match the actual export name
+import { authenticate } from '../../middleware/auth.js';
 
 const router = express.Router();
-router.get('/', protect, getProfile);
-router.put('/', protect, updateProfile);
+
+// Use the correct 'authenticate' middleware
+router.route('/')
+  .get(authenticate, getProfile)
+  .put(authenticate, updateProfile);
+
 export default router;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IssueNav } from '../components/IssueNav';
-import { adminTicketsAPI, dashboardAPI, commentsAPI } from '../services/api';
+import { adminTicketsAPI, dashboardAPI } from '../services/api';
 import { useToastContext } from '../context/ToastContext';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import './DashboardPage.css';

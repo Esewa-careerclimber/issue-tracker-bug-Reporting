@@ -17,9 +17,10 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=5001
-      - MONGODB_URI=mongodb+srv://lina:buterflybuterfly@cluster0.nm0v4us.mongodb.net/issue_tracker?retryWrites=true&w=majority&appName=Cluster0
+      - MONGODB_URI=${MONGODB_URI}
       - JWT_SECRET=${JWT_SECRET}
-
+    networks:
+      - issue-tracker-network
     volumes:
       - ./server:/app
       - /app/node_modules
@@ -33,6 +34,7 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=development
+      - VITE_API_BASE_URL=http://localhost:5001
     networks:
       - issue-tracker-network
     volumes:
@@ -45,6 +47,8 @@ services:
     restart: unless-stopped
     ports:
       - "5002:5002"  
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
     networks:
       - issue-tracker-network
 

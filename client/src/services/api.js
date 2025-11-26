@@ -1,285 +1,99 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+import axios from 'axios';
 
-// Helper function to get auth token
-const getAuthToken = () => {
-  return localStorage.getItem('token');
-};
+// The base URL from the environment variable (http://localhost:5001)
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001';
 
-// Helper function to handle API responses
-const handleResponse = async (response) => {
-  const data = await response.json();
-  
-  if (!response.ok) {
-    throw new Error(data.message || 'Something went wrong');
+// Create an Axios instance with the correct full base URL, including '/api'
+const api = axios.create({
+  baseURL: `${API_BASE_URL}/api`,
+});
+
+// Use an interceptor to automatically add the auth token to every request.
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Use a response interceptor to standardize error handling.
+api.interceptors.response.use(
+  (response) => response.data, // On success, just return the data
+  (error) => {
+    // On error, reject with a consistent error message.
+    const message = error.response?.data?.message || error.message || 'An unknown error occurred';
+    return Promise.reject(new Error(message));
   }
-  
-  return data;
-};
+);
 
 // Auth API
 export const authAPI = {
-  login: async (credentials) => {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(credentials),
-    });
-    return handleResponse(response);
-  },
-
-  registerUser: async (userData) => {
-    const response = await fetch(`${API_BASE_URL}/auth/register/user`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(userData),
-    });
-    return handleResponse(response);
-  },
-
-  registerAdmin: async (adminData) => {
-    const response = await fetch(`${API_BASE_URL}/auth/register/admin`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(adminData),
-    });
-    return handleResponse(response);
-  },
-
-  logout: async () => {
-    const token = getAuthToken();
-    const response = await fetch(`${API_BASE_URL}/auth/logout`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-    return handleResponse(response);
-  },
+  login: (credentials) => api.post('/auth/login', credentials),
+  registerUser: (userData) => api.post('/auth/register/user', userData),
+  registerAdmin: (adminData) => api.post('/auth/register/admin', adminData),
+  logout: () => api.post('/auth/logout'),
 };
 
 // User Tickets API
 export const ticketsAPI = {
-  createTicket: async (ticketData) => {
-    const token = getAuthToken();
+  createTicket: (ticketData) => {
     const formData = new FormData();
-    
-    Object.keys(ticketData).forEach(key => {
-      if (ticketData[key] !== null && ticketData[key] !== undefined) {
-        formData.append(key, ticketData[key]);
-      }
-    });
+    formData.append('title', ticketData.title);
+    formData.append('description', ticketData.description);
+    formData.append('type', ticketData.type);
+    formData.append('category', ticketData.category);
 
-    const response = await fetch(`${API_BASE_URL}/user/tickets`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-      body: formData,
-    });
-    return handleResponse(response);
+    if (ticketData.attachment) {
+      formData.append('attachment', ticketData.attachment);
+    }
+    return api.post('/user/tickets', formData);
   },
-
-  getUserTickets: async () => {
-    const token = getAuthToken();
-    const response = await fetch(`${API_BASE_URL}/user/tickets`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-    return handleResponse(response);
-  },
-
-  getTicketById: async (id) => {
-    const token = getAuthToken();
-    const response = await fetch(`${API_BASE_URL}/user/tickets/${id}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-    return handleResponse(response);
-  },
-
-  getMyTickets: async () => {
-    const token = getAuthToken();
-    const response = await fetch(`${API_BASE_URL}/user/tickets/myissues`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-    return handleResponse(response);
-  },
+  getUserTickets: () => api.get('/user/tickets'),
+  getTicketById: (id) => api.get(`/user/tickets/${id}`),
 };
 
 // Admin Tickets API
 export const adminTicketsAPI = {
-  getAllTickets: async () => {
-    const token = getAuthToken();
-    const response = await fetch(`${API_BASE_URL}/admin/tickets`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-    return handleResponse(response);
-  },
-
-  updateTicketStatus: async (id, status) => {
-    const token = getAuthToken();
-    const response = await fetch(`${API_BASE_URL}/admin/tickets/${id}/status`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({ status }),
-    });
-    return handleResponse(response);
-  },
-
-  assignTicket: async (id, userId) => {
-    const token = getAuthToken();
-    const response = await fetch(`${API_BASE_URL}/admin/tickets/${id}/assign`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({ assignedTo: userId }),
-    });
-    return handleResponse(response);
-  },
-
-  deleteTicket: async (id) => {
-    const token = getAuthToken();
-    const response = await fetch(`${API_BASE_URL}/admin/tickets/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-    return handleResponse(response);
-  },
+  getAllTickets: () => api.get('/admin/tickets'),
+  updateTicketStatus: (id, status) => api.patch(`/admin/tickets/${id}/status`, { status }),
+  assignTicket: (id, userId) => api.patch(`/admin/tickets/${id}/assign`, { assignedTo: userId }),
 };
 
-// Admin Users API
-export const adminUsersAPI = {
-  listUsers: async () => {
-    const token = getAuthToken();
-    const response = await fetch(`${API_BASE_URL}/admin/users`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-    return handleResponse(response);
-  },
+// FIX: Added the missing commentsAPI object
+export const commentsAPI = {
+  createComment: (ticketId, commentData) => api.post(`/user/comments/${ticketId}`, commentData),
+  deleteComment: (commentId) => api.delete(`/admin/comments/${commentId}`),
 };
 
 // Dashboard API
 export const dashboardAPI = {
-  getUserDashboard: async () => {
-    const token = getAuthToken();
-    const response = await fetch(`${API_BASE_URL}/user/dashboard`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-    return handleResponse(response);
-  },
-
-  getAdminDashboard: async () => {
-    const token = getAuthToken();
-    const response = await fetch(`${API_BASE_URL}/admin/dashboard`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-    return handleResponse(response);
-  },
+  getUserDashboard: () => api.get('/user/dashboard'),
+  getAdminDashboard: () => api.get('/admin/dashboard'),
 };
 
 // Profile API
 export const profileAPI = {
-  getProfile: async () => {
-    const token = getAuthToken();
-    const response = await fetch(`${API_BASE_URL}/user/profile`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-    return handleResponse(response);
-  },
-
-  updateProfile: async (profileData) => {
-    const token = getAuthToken();
-    const response = await fetch(`${API_BASE_URL}/user/profile`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify(profileData),
-    });
-    return handleResponse(response);
-  },
+  getProfile: () => api.get('/user/profile'),
+  updateProfile: (profileData) => api.put('/user/profile', profileData),
 };
 
 // Notifications API
 export const notificationsAPI = {
-  getNotifications: async () => {
-    const token = getAuthToken();
-    const response = await fetch(`${API_BASE_URL}/user/notifications`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-    return handleResponse(response);
-  },
-
-  markAsRead: async (id) => {
-    const token = getAuthToken();
-    const response = await fetch(`${API_BASE_URL}/user/notifications/${id}/read`, {
-      method: 'PATCH',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-    return handleResponse(response);
-  },
+  getNotifications: () => api.get('/user/notifications'),
+  markAsRead: (id) => api.patch(`/user/notifications/${id}/read`),
 };
 
-// Comments API
-export const commentsAPI = {
-  getComments: async (ticketId) => {
-    const token = getAuthToken();
-    const response = await fetch(`${API_BASE_URL}/user/comments/${ticketId}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-    return handleResponse(response);
-  },
-
-  addComment: async (ticketId, text) => {
-    const token = getAuthToken();
-    const response = await fetch(`${API_BASE_URL}/user/comments/${ticketId}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({ text }),
-    });
-    return handleResponse(response);
-  },
-};
-
+// Default export combining all APIs for easy import elsewhere
 export default {
   auth: authAPI,
   tickets: ticketsAPI,
   adminTickets: adminTicketsAPI,
-  adminUsers: adminUsersAPI,
+  comments: commentsAPI, // FIX: Added commentsAPI to the default export
   dashboard: dashboardAPI,
   profile: profileAPI,
   notifications: notificationsAPI,
-  comments: commentsAPI,
 };

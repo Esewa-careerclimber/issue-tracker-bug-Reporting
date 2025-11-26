@@ -2,8 +2,8 @@ import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import path from "path";
-import { fileURLToPath } from "url";
+import connectDB from "./config/db.js";
+import logger from "./utils/logger.js";
 import authRoutes from "./routes/auth.js";
 import userTicketRoutes from "./routes/user/tickets.js";
 import adminTicketRoutes from "./routes/admin/tickets.js";
@@ -65,20 +65,13 @@ app.use(errorHandler);
 
 // Connect to MongoDB
 if (process.env.NODE_ENV !== "test") {
-  mongoose
-    .connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    })
-    .then(() => console.log("MongoDB connected"))
-    .catch((err) => console.error("MongoDB connection error:", err));
+  connectDB();
 }
 
 // Start server
 if (process.env.NODE_ENV !== "test") {
   app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    logger.info(`Server running on port ${PORT}`);
   });
 }
 export default app;
-

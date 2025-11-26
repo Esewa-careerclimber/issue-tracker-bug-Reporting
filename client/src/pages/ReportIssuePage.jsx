@@ -1,95 +1,42 @@
-import React, { useState, useEffect } from 'react';
-import { ticketsAPI, adminUsersAPI } from '../services/api';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { useToastContext } from '../context/ToastContext';
-import { LoadingSpinner } from '../components/LoadingSpinner';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ticketsAPI } from '../services/api';
 import './ReportIssuePage.css';
 
-export default function ReportIssuePage() {
-  const navigate = useNavigate();
-  const { user, isAdmin } = useAuth();
-  const { success, error: showError } = useToastContext();
-  const [formData, setFormData] = useState({
-    title: '',
-    category: 'bug',
-    description: '',
-    image: null,
-  });
-  const [loading, setLoading] = useState(false);
+const ReportIssuePage = () => {
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [type, setType] = useState('bug');
+  const [category, setCategory] = useState('general');
+  const [attachment, setAttachment] = useState(null);
   const [error, setError] = useState('');
-  const [assignableUsers, setAssignableUsers] = useState([]);
-  const [selectedAssignee, setSelectedAssignee] = useState('');
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      if (!isAdmin) return;
-      try {
-        const users = await adminUsersAPI.listUsers();
-        setAssignableUsers(users || []);
-      } catch (err) {
-        console.error('Failed to load team members', err);
-        showError('Unable to load team members for assignment.');
-      }
-    };
-    fetchUsers();
-  }, [isAdmin, showError]);
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    setError('');
-  };
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFormData(prev => ({ ...prev, image: file }));
-    }
-  };
+  const [success, setSuccess] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
-    
-    try {
-      const payload = { ...formData };
-      if (isAdmin && selectedAssignee) {
-        payload.assignedTo = selectedAssignee;
-      } else if (!isAdmin && user?._id) {
-        payload.assignedTo = user._id;
-      }
+    setSuccess('');
 
-      const createdTicket = await ticketsAPI.createTicket(payload);
-      success('Issue created successfully! AI is analyzing severity...');
-      
-      // Reset form
-      setFormData({
-        title: '',
-        category: 'bug',
-        description: '',
-        image: null
-      });
-      setSelectedAssignee('');
-      
-      // Reset file input
-      const fileInput = document.getElementById('image');
-      if (fileInput) fileInput.value = '';
-      
-      // Navigate to the newly created issue details page
-      setTimeout(() => {
-        if (createdTicket && createdTicket._id) {
-          navigate(`/issue/${createdTicket._id}`);
-        } else {
-          navigate('/user');
-        }
-      }, 1200);
+    if (!title || !description || !type || !category) {
+      setError('Please fill in all required fields.');
+      return;
+    }
+
+    const ticketData = {
+      title,
+      description,
+      type,
+      category,
+      attachment,
+    };
+
+    try {
+      await ticketsAPI.createTicket(ticketData);
+      setSuccess('Issue reported successfully! Redirecting...');
+      setTimeout(() => navigate('/my-issues'), 2000);
     } catch (err) {
-      const errorMsg = err.message || 'Failed to create issue. Please try again.';
-      setError(errorMsg);
-      showError(errorMsg);
-    } finally {
-      setLoading(false);
+      setError(err.message || 'Failed to report issue.');
     }
   };
 
@@ -149,78 +96,50 @@ export default function ReportIssuePage() {
         <p>Help us improve by reporting bugs, requesting features, or providing feedback. AI will analyze severity automatically.</p>
       </div>
 
-      {error && (
-        <div className="inline-error">
-          {error}
-        </div>
-      )}
+      {error && <div className="error-message">{error}</div>}
+      {success && <div className="success-message">{success}</div>}
 
-      <form className="issue-form" onSubmit={handleSubmit}>
-        <div className="form-row">
-          <div className="form-group full-width">
-            <label htmlFor="title">Issue Title *</label>
-            <input
-              type="text"
-              id="title"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              placeholder="Brief description of the issue"
-              required
-            />
-          </div>
+      <form className="report-issue-form" onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label htmlFor="title">Issue Title *</label>
+          <input
+            type="text"
+            id="title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+          />
         </div>
 
+        {/* FIX: This div wraps the two dropdowns and applies the flexbox styles */}
         <div className="form-row">
           <div className="form-group">
-            <label htmlFor="category">Issue Type *</label>
-            <select
-              id="category"
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              required
-            >
+            <label htmlFor="type">Issue Type *</label>
+            <select id="type" value={type} onChange={(e) => setType(e.target.value)} required>
               <option value="bug">Bug Report</option>
               <option value="feature">Feature Request</option>
-              <option value="support">Support Request</option>
-              <option value="feedback">General Feedback</option>
+              <option value="feedback">Feedback</option>
             </select>
           </div>
-
           <div className="form-group">
-            <label htmlFor="image">Attachment (optional)</label>
-            <input
-              type="file"
-              id="image"
-              name="image"
-              accept="image/*"
-              onChange={handleFileChange}
-            />
-            {formData.image && (
-              <small style={{ display: 'block', marginTop: '4px', color: 'var(--color-text-muted)' }}>
-                Selected: {formData.image.name}
-              </small>
-            )}
+            <label htmlFor="category">Category *</label>
+            <select id="category" value={category} onChange={(e) => setCategory(e.target.value)} required>
+              <option value="general">General</option>
+              <option value="ui-ux">UI/UX</option>
+              <option value="backend">Backend</option>
+              <option value="frontend">Frontend</option>
+              <option value="performance">Performance</option>
+            </select>
           </div>
         </div>
 
-        <div className="form-row">
-          <div className="form-group full-width">
-            <label htmlFor="description">Description *</label>
-            <textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              placeholder="Provide a detailed description of the issue. Our AI will automatically analyze the severity and create a summary."
-              rows="6"
-              required
-            />
-            <small style={{ display: 'block', marginTop: '4px', color: 'var(--color-text-muted)' }}>
-              💡 AI will automatically detect issue severity and generate a summary
-            </small>
-          </div>
+        <div className="form-group">
+          <label htmlFor="attachment">Attachment (optional)</label>
+          <input
+            type="file"
+            id="attachment"
+            onChange={(e) => setAttachment(e.target.files[0])}
+          />
         </div>
 
         {isAdmin && (
@@ -258,7 +177,11 @@ export default function ReportIssuePage() {
             )}
           </button>
         </div>
+
+        <button type="submit" className="submit-btn">Submit Issue</button>
       </form>
     </div>
   );
-}
+};
+
+export default ReportIssuePage;
